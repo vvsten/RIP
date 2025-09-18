@@ -1,0 +1,599 @@
+/* Основные цвета из Figma макета */
+:root {
+    --primary-bg: #f8f9fa;      /* Светло-серый фон */
+    --card-bg: #ffffff;         /* Белый фон карточек */
+    --text-primary: #212529;    /* Основной черный текст */
+    --text-secondary: #6c757d;  /* Серый текст */
+    --accent-orange: #fd7e14;   /* Оранжевый акцент */
+    --accent-blue: #0d6efd;     /* Синий акцент */
+    --border-color: #dee2e6;    /* Цвет границ */
+    --hover-bg: #e9ecef;        /* Фон при наведении */
+}
+
+/* Сброс стилей */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    background-color: var(--primary-bg);
+    color: var(--text-primary);
+    line-height: 1.6;
+}
+
+/* Header */
+.header {
+    background-color: var(--card-bg);
+    padding: 1rem 2rem;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.logo {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 1.5rem;
+    font-weight: bold;
+    color: var(--text-primary);
+    text-decoration: none;
+}
+
+.logo-icon {
+    width: 24px;
+    height: 24px;
+    background-color: var(--accent-orange);
+    border-radius: 4px;
+}
+
+.home-btn {
+    background-color: var(--accent-blue);
+    color: white;
+    border: none;
+    padding: 0.5rem 1rem;
+    border-radius: 6px;
+    text-decoration: none;
+    font-weight: 500;
+    transition: background-color 0.2s;
+}
+
+.home-btn:hover {
+    background-color: #0b5ed7;
+}
+
+/* Контейнер */
+.container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 2rem;
+}
+
+/* Поиск */
+.search-section {
+    background-color: var(--card-bg);
+    padding: 2rem;
+    border-radius: 8px;
+    margin-bottom: 2rem;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.search-form {
+    display: flex;
+    gap: 1rem;
+    max-width: 500px;
+    margin: 0 auto;
+}
+
+.search-input {
+    flex: 1;
+    padding: 0.75rem 1rem;
+    border: 2px solid var(--border-color);
+    border-radius: 6px;
+    font-size: 1rem;
+    transition: border-color 0.2s;
+}
+
+.search-input:focus {
+    outline: none;
+    border-color: var(--accent-blue);
+}
+
+.search-btn {
+    background-color: var(--text-secondary);
+    color: white;
+    border: none;
+    padding: 0.75rem 1.5rem;
+    border-radius: 6px;
+    cursor: pointer;
+    font-weight: 500;
+    transition: background-color 0.2s;
+}
+
+.search-btn:hover {
+    background-color: #5a6268;
+}
+
+/* Сетка услуг */
+.services-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 2rem;
+    margin-bottom: 2rem;
+}
+
+/* Карточка услуги */
+.service-card {
+    background-color: var(--card-bg);
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    overflow: hidden;
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.service-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 4px 16px rgba(0,0,0,0.15);
+}
+
+.service-image {
+    width: 100%;
+    height: 200px;
+    object-fit: cover;
+    background-color: var(--hover-bg);
+}
+
+.service-content {
+    padding: 1.5rem;
+}
+
+.service-title {
+    font-size: 1.25rem;
+    font-weight: bold;
+    margin-bottom: 0.5rem;
+    color: var(--text-primary);
+}
+
+.service-price {
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: var(--accent-orange);
+    margin-bottom: 1rem;
+}
+
+.service-description {
+    color: var(--text-secondary);
+    margin-bottom: 1rem;
+    font-size: 0.9rem;
+}
+
+.service-actions {
+    display: flex;
+    gap: 1rem;
+}
+
+.details-link {
+    color: var(--accent-blue);
+    text-decoration: none;
+    font-weight: 500;
+    transition: color 0.2s;
+}
+
+.details-link:hover {
+    color: #0b5ed7;
+    text-decoration: underline;
+}
+
+.consult-btn {
+    background-color: var(--hover-bg);
+    color: var(--text-primary);
+    border: none;
+    padding: 0.5rem 1rem;
+    border-radius: 6px;
+    cursor: pointer;
+    font-weight: 500;
+    transition: background-color 0.2s;
+}
+
+.consult-btn:hover {
+    background-color: var(--border-color);
+}
+
+/* Карточка заявки */
+.order-card {
+    background-color: var(--card-bg);
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    padding: 1.5rem;
+    margin-bottom: 2rem;
+    border-left: 4px solid var(--accent-orange);
+}
+
+.order-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
+}
+
+.order-title {
+    font-size: 1.25rem;
+    font-weight: bold;
+    color: var(--text-primary);
+}
+
+.order-count {
+    background-color: var(--accent-orange);
+    color: white;
+    padding: 0.25rem 0.75rem;
+    border-radius: 20px;
+    font-size: 0.9rem;
+    font-weight: 500;
+}
+
+.order-info {
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+}
+
+.order-link {
+    color: var(--accent-blue);
+    text-decoration: none;
+    font-weight: 500;
+    margin-top: 1rem;
+    display: inline-block;
+    transition: color 0.2s;
+}
+
+.order-link:hover {
+    color: #0b5ed7;
+    text-decoration: underline;
+}
+
+/* Страница услуги */
+.service-detail {
+    background-color: var(--card-bg);
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    overflow: hidden;
+    margin-bottom: 2rem;
+}
+
+.service-detail-image {
+    width: 100%;
+    height: 400px;
+    object-fit: cover;
+    background-color: var(--hover-bg);
+}
+
+.service-detail-content {
+    padding: 2rem;
+}
+
+.service-detail-title {
+    font-size: 2rem;
+    font-weight: bold;
+    margin-bottom: 1rem;
+    color: var(--text-primary);
+}
+
+.service-detail-price {
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: var(--accent-orange);
+    margin-bottom: 1rem;
+}
+
+.service-detail-description {
+    color: var(--text-secondary);
+    font-size: 1.1rem;
+    line-height: 1.8;
+    margin-bottom: 2rem;
+}
+
+.service-specs {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1rem;
+    margin-bottom: 2rem;
+}
+
+.spec-item {
+    background-color: var(--primary-bg);
+    padding: 1rem;
+    border-radius: 6px;
+    text-align: center;
+}
+
+.spec-label {
+    font-size: 0.9rem;
+    color: var(--text-secondary);
+    margin-bottom: 0.5rem;
+}
+
+.spec-value {
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: var(--text-primary);
+}
+
+/* Страница заявки */
+.order-details {
+    background-color: var(--card-bg);
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    padding: 2rem;
+    margin-bottom: 2rem;
+}
+
+.order-details-title {
+    font-size: 1.5rem;
+    font-weight: bold;
+    margin-bottom: 1.5rem;
+    color: var(--text-primary);
+}
+
+.order-params {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1rem;
+    margin-bottom: 2rem;
+}
+
+.param-item {
+    background-color: var(--primary-bg);
+    padding: 1rem;
+    border-radius: 6px;
+}
+
+.param-label {
+    font-size: 0.9rem;
+    color: var(--text-secondary);
+    margin-bottom: 0.5rem;
+}
+
+.param-value {
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: var(--text-primary);
+}
+
+.order-summary {
+    background-color: var(--accent-orange);
+    color: white;
+    padding: 1.5rem;
+    border-radius: 6px;
+    text-align: center;
+    margin-bottom: 2rem;
+}
+
+.order-summary-title {
+    font-size: 1.25rem;
+    font-weight: bold;
+    margin-bottom: 0.5rem;
+}
+
+.order-summary-value {
+    font-size: 1.5rem;
+    font-weight: 600;
+}
+
+/* Услуги в заявке */
+.order-services {
+    margin-top: 2rem;
+}
+
+.order-services-title {
+    font-size: 1.25rem;
+    font-weight: bold;
+    margin-bottom: 1rem;
+    color: var(--text-primary);
+}
+
+.order-service-item {
+    background-color: var(--card-bg);
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    padding: 1.5rem;
+    margin-bottom: 1rem;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.order-service-image {
+    width: 80px;
+    height: 80px;
+    object-fit: cover;
+    border-radius: 6px;
+    background-color: var(--hover-bg);
+}
+
+.order-service-info {
+    flex: 1;
+}
+
+.order-service-name {
+    font-size: 1.1rem;
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+    color: var(--text-primary);
+}
+
+.order-service-details {
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+}
+
+.order-service-params {
+    display: flex;
+    gap: 1rem;
+    margin-top: 0.5rem;
+}
+
+.order-service-param {
+    background-color: var(--primary-bg);
+    padding: 0.25rem 0.75rem;
+    border-radius: 4px;
+    font-size: 0.8rem;
+    color: var(--text-secondary);
+}
+
+/* Калькулятор */
+.calculator-page {
+    max-width: 800px;
+    margin: 0 auto;
+}
+
+.calculator-title {
+    font-size: 2rem;
+    font-weight: bold;
+    text-align: center;
+    margin-bottom: 2rem;
+    color: var(--text-primary);
+}
+
+.calculator-form {
+    background-color: var(--card-bg);
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    padding: 2rem;
+}
+
+.form-section {
+    background-color: var(--primary-bg);
+    border-radius: 8px;
+    padding: 1.5rem;
+    margin-bottom: 1.5rem;
+}
+
+.section-title {
+    font-size: 1.25rem;
+    font-weight: bold;
+    margin-bottom: 1rem;
+    color: var(--text-primary);
+}
+
+.direction-fields {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+}
+
+.cargo-fields {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 0.5rem;
+    margin-bottom: 1rem;
+}
+
+.calculation-fields {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+}
+
+.field-group {
+    display: flex;
+    flex-direction: column;
+}
+
+.field-label {
+    font-size: 0.9rem;
+    font-weight: 500;
+    margin-bottom: 0.5rem;
+    color: var(--text-primary);
+}
+
+.form-input {
+    padding: 0.75rem 0.5rem;
+    border: 2px solid var(--border-color);
+    border-radius: 6px;
+    font-size: 0.9rem;
+    background-color: var(--card-bg);
+    transition: border-color 0.2s;
+    width: 100%;
+    box-sizing: border-box;
+}
+
+.form-input:focus {
+    outline: none;
+    border-color: var(--accent-blue);
+}
+
+.result-field {
+    padding: 0.75rem 1rem;
+    background-color: var(--hover-bg);
+    border-radius: 6px;
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--text-primary);
+    border: 2px solid var(--border-color);
+}
+
+.submit-btn {
+    width: 100%;
+    background-color: var(--accent-orange);
+    color: white;
+    border: none;
+    padding: 1rem 2rem;
+    border-radius: 6px;
+    font-size: 1.1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background-color 0.2s;
+    margin-top: 1rem;
+}
+
+.submit-btn:hover {
+    background-color: #e55a00;
+}
+
+/* Адаптивность */
+@media (max-width: 768px) {
+    .container {
+        padding: 1rem;
+    }
+    
+    .header {
+        padding: 1rem;
+    }
+    
+    .services-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .search-form {
+        flex-direction: column;
+    }
+    
+    .service-actions {
+        flex-direction: column;
+    }
+    
+    .order-service-item {
+        flex-direction: column;
+        text-align: center;
+    }
+    
+    .order-service-params {
+        justify-content: center;
+    }
+    
+    .direction-fields {
+        grid-template-columns: 1fr;
+    }
+    
+    .cargo-fields {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 0.25rem;
+    }
+    
+    .calculation-fields {
+        grid-template-columns: 1fr;
+    }
+}

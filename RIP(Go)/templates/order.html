@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Заявка №{{ .order.ID }} - GruzDelivery</title>
+    <link rel="stylesheet" href="/static/css/style.css">
+</head>
+<body>
+    <header class="header">
+        <a href="/" class="logo">
+            <div class="logo-icon">🚚</div>
+            GruzDelivery
+        </a>
+        <a href="/calculator" class="home-btn">🧮 Калькулятор</a>
+    </header>
+
+    <div class="container">
+        <div class="order-details">
+            <h1 class="order-details-title">Заявка №{{ .order.ID }}</h1>
+            
+            <div class="order-params">
+                <div class="param-item">
+                    <div class="param-label">Откуда</div>
+                    <div class="param-value">{{ .order.FromCity }}</div>
+                </div>
+                <div class="param-item">
+                    <div class="param-label">Куда</div>
+                    <div class="param-value">{{ .order.ToCity }}</div>
+                </div>
+                <div class="param-item">
+                    <div class="param-label">Вес груза</div>
+                    <div class="param-value">{{ .order.Weight }} кг</div>
+                </div>
+                <div class="param-item">
+                    <div class="param-label">Длина</div>
+                    <div class="param-value">{{ .order.Length }} м</div>
+                </div>
+                <div class="param-item">
+                    <div class="param-label">Ширина</div>
+                    <div class="param-value">{{ .order.Width }} м</div>
+                </div>
+                <div class="param-item">
+                    <div class="param-label">Высота</div>
+                    <div class="param-value">{{ .order.Height }} м</div>
+                </div>
+            </div>
+
+            <div class="order-summary">
+                <div class="order-summary-title">Итоговая стоимость</div>
+                <div class="order-summary-value">{{ .order.TotalCost }} рублей</div>
+            </div>
+
+            <div class="order-summary" style="background-color: var(--accent-blue);">
+                <div class="order-summary-title">Сроки доставки</div>
+                <div class="order-summary-value">{{ .order.TotalDays }} дней</div>
+            </div>
+        </div>
+
+        <div class="order-services">
+            <h2 class="order-services-title">Услуги в заявке</h2>
+            
+            {{ range $index, $service := .services }}
+            <div class="order-service-item">
+                <img src="{{ $service.ImageURL }}" alt="{{ $service.Name }}" class="order-service-image" onerror="this.src='data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iODAiIGhlaWdodD0iODAiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PHJlY3Qgd2lkdGg9IjEwMCUiIGhlaWdodD0iMTAwJSIgZmlsbD0iI2Y4ZjlmYSIvPjx0ZXh0IHg9IjUwJSIgeT0iNTAlIiBmb250LWZhbWlseT0iQXJpYWwiIGZvbnQtc2l6ZT0iMTIiIGZpbGw9IiM2Yzc1N2QiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGR5PSIuM2VtIj5ObyBJbWFnZTwvdGV4dD48L3N2Zz4='">
+                <div class="order-service-info">
+                    <div class="order-service-name">{{ $service.Name }}</div>
+                    <div class="order-service-details">
+                        <strong>Цена:</strong> {{ $service.Price }} руб. | 
+                        <strong>Сроки:</strong> {{ $service.DeliveryDays }} дней | 
+                        <strong>Макс. вес:</strong> {{ $service.MaxWeight }} кг | 
+                        <strong>Макс. объем:</strong> {{ $service.MaxVolume }} м³
+                    </div>
+                    <div class="order-service-params">
+                        <div class="order-service-param">Количество: {{ index $.order.Services $index "Quantity" }}</div>
+                        <div class="order-service-param">Комментарий: {{ index $.order.Services $index "Comment" }}</div>
+                    </div>
+                </div>
+            </div>
+            {{ end }}
+        </div>
+
+        <div style="text-align: center; margin-top: 2rem;">
+            <a href="/" class="home-btn">← Вернуться к услугам</a>
+        </div>
+    </div>
+</body>
+</html> 

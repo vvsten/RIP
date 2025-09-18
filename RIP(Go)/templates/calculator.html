@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Калькулятор - GruzDelivery</title>
+    <link rel="stylesheet" href="/static/css/style.css">
+</head>
+<body>
+    <header class="header">
+        <a href="/" class="logo">
+            <div class="logo-icon">🚚</div>
+            GruzDelivery
+        </a>
+        <a href="/" class="home-btn">🏠 Главная</a>
+    </header>
+
+    <div class="container">
+        <div class="calculator-page">
+            <h1 class="calculator-title">Расчёт и оформление заявки</h1>
+            
+            <form class="calculator-form" method="POST" action="/calculator">
+                <!-- Направление -->
+                <div class="form-section">
+                    <h2 class="section-title">Направление</h2>
+                    <div class="direction-fields">
+                        <div class="field-group">
+                            <label class="field-label">Откуда</label>
+                            <input type="text" name="from_city" class="form-input" placeholder="Населенный пункт" value="{{ .FromCity }}">
+                        </div>
+                        <div class="field-group">
+                            <label class="field-label">Куда</label>
+                            <input type="text" name="to_city" class="form-input" placeholder="Населенный пункт" value="{{ .ToCity }}">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Параметры груза -->
+                <div class="form-section">
+                    <h2 class="section-title">Параметры груза</h2>
+                    <div class="cargo-fields">
+                        <div class="field-group">
+                            <label class="field-label">Длина</label>
+                            <input type="number" name="length" class="form-input" placeholder="0 м" step="0.1" value="{{ .Length }}">
+                        </div>
+                        <div class="field-group">
+                            <label class="field-label">Ширина</label>
+                            <input type="number" name="width" class="form-input" placeholder="0 м" step="0.1" value="{{ .Width }}">
+                        </div>
+                        <div class="field-group">
+                            <label class="field-label">Высота</label>
+                            <input type="number" name="height" class="form-input" placeholder="0 м" step="0.1" value="{{ .Height }}">
+                        </div>
+                        <div class="field-group">
+                            <label class="field-label">Вес</label>
+                            <input type="number" name="weight" class="form-input" placeholder="0 кг" step="0.1" value="{{ .Weight }}">
+                        </div>
+                    </div>
+                    <div class="field-group">
+                        <label class="field-label">Тип доставки</label>
+                        <select name="delivery_type" class="form-input">
+                            <option value="">Тип доставки</option>
+                            <option value="fura" {{ if eq .DeliveryType "fura" }}selected{{ end }}>Фура</option>
+                            <option value="malotonnazhnyi" {{ if eq .DeliveryType "malotonnazhnyi" }}selected{{ end }}>Малотоннажный грузовик</option>
+                            <option value="avia" {{ if eq .DeliveryType "avia" }}selected{{ end }}>Авиаперевозка</option>
+                            <option value="poezd" {{ if eq .DeliveryType "poezd" }}selected{{ end }}>Поезд</option>
+                            <option value="korabl" {{ if eq .DeliveryType "korabl" }}selected{{ end }}>Корабль</option>
+                            <option value="multimodal" {{ if eq .DeliveryType "multimodal" }}selected{{ end }}>Мультимодальные</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Расчет -->
+                <div class="form-section">
+                    <h2 class="section-title">Расчет:</h2>
+                    <div class="calculation-fields">
+                        <div class="field-group">
+                            <label class="field-label">Сроки доставки</label>
+                            <div class="result-field">{{ .DeliveryDays }} дней</div>
+                        </div>
+                        <div class="field-group">
+                            <label class="field-label">Стоимость</label>
+                            <div class="result-field">{{ .TotalCost }} рублей</div>
+                        </div>
+                    </div>
+                </div>
+
+                <button type="submit" class="submit-btn">Оформить заявку</button>
+            </form>
+        </div>
+    </div>
+</body>
+</html>
