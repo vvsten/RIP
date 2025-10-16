@@ -1,0 +1,154 @@
+openapi: 3.0.3
+info:
+  title: Cargo Delivery API
+  version: 1.0.0
+paths:
+  /api/searchtrans:
+    post:
+      summary: Поиск транспорта
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                search_query: { type: string }
+                transport_type: { type: string }
+      responses:
+        '200': { description: OK }
+        '400': { description: Bad Request }
+        '500': { description: Internal Server Error }
+  /api/calculatecargo:
+    post:
+      summary: Расчёт стоимости и сроков без сохранения
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                service_id: { type: integer }
+                from_city: { type: string }
+                to_city: { type: string }
+                length: { type: number }
+                width: { type: number }
+                height: { type: number }
+                weight: { type: number }
+      responses:
+        '200': { description: OK }
+        '400': { description: Bad Request }
+        '404': { description: Not Found }
+        '500': { description: Internal Server Error }
+  /api/submitcargoorder:
+    post:
+      summary: Создание заявки
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                services:
+                  type: array
+                  items:
+                    type: object
+                    properties:
+                      service_id: { type: integer }
+                      from_city: { type: string }
+                      to_city: { type: string }
+                      length: { type: number }
+                      width: { type: number }
+                      height: { type: number }
+                      weight: { type: number }
+      responses:
+        '201': { description: Created }
+        '400': { description: Bad Request }
+        '500': { description: Internal Server Error }
+  /api/order/{id}/status:
+    put:
+      summary: Обновление статуса заказа
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: integer }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                status: { type: string }
+      responses:
+        '200': { description: OK }
+        '400': { description: Bad Request }
+        '500': { description: Internal Server Error }
+  /api/services/{id}:
+    get:
+      summary: Получить услугу
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: integer }
+      responses:
+        '200': { description: OK }
+        '404': { description: Not Found }
+    put:
+      summary: Обновить услугу
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: integer }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Service'
+      responses:
+        '200': { description: OK }
+        '400': { description: Bad Request }
+        '500': { description: Internal Server Error }
+    delete:
+      summary: Удалить услугу
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: integer }
+      responses:
+        '200': { description: OK }
+        '500': { description: Internal Server Error }
+  /api/services:
+    post:
+      summary: Создать услугу
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Service'
+      responses:
+        '201': { description: Created }
+        '400': { description: Bad Request }
+        '500': { description: Internal Server Error }
+components:
+  schemas:
+    Service:
+      type: object
+      properties:
+        id: { type: integer }
+        name: { type: string }
+        description: { type: string }
+        price: { type: number }
+        image_url: { type: string }
+        delivery_days: { type: integer }
+        max_weight: { type: number }
+        max_volume: { type: number }
+

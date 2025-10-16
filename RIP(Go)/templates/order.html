@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Заявка №{{ .order.ID }} - GruzDelivery</title>
+    <link rel="stylesheet" href="/static/css/style.css">
+</head>
+<body>
+    <header class="header">
+        <a href="/" class="logo">
+            <div class="logo-icon">🚚</div>
+            GruzDelivery
+        </a>
+        <a href="/calculator" class="home-btn">🧮 Калькулятор</a>
+    </header>
+
+    <div class="container">
+        <div class="order-details">
+            <h1 class="order-details-title">Заявка №{{ .order.ID }}</h1>
+            
+            <div class="order-params">
+                <div class="param-item">
+                    <div class="param-label">Откуда</div>
+                    <div class="param-value">{{ .order.FromCity }}</div>
+                </div>
+                <div class="param-item">
+                    <div class="param-label">Куда</div>
+                    <div class="param-value">{{ .order.ToCity }}</div>
+                </div>
+                <div class="param-item">
+                    <div class="param-label">Вес груза</div>
+                    <div class="param-value">{{ .order.Weight }} кг</div>
+                </div>
+                <div class="param-item">
+                    <div class="param-label">Длина</div>
+                    <div class="param-value">{{ .order.Length }} м</div>
+                </div>
+                <div class="param-item">
+                    <div class="param-label">Ширина</div>
+                    <div class="param-value">{{ .order.Width }} м</div>
+                </div>
+                <div class="param-item">
+                    <div class="param-label">Высота</div>
+                    <div class="param-value">{{ .order.Height }} м</div>
+                </div>
+            </div>
+
+            <div class="order-summary">
+                <div class="order-summary-title">Итоговая стоимость</div>
+                <div class="order-summary-value">{{ .order.TotalCost }} рублей</div>
+            </div>
+
+            <div class="order-summary" style="background-color: var(--accent-blue);">
+                <div class="order-summary-title">Сроки доставки</div>
+                <div class="order-summary-value">{{ .order.TotalDays }} дней</div>
+            </div>
+
+            <div class="order-status-section">
+                <div class="order-status-title">Статус заказа</div>
+                <div class="order-status-value" id="order-status">{{ .order.Status }}</div>
+                
+                <div class="status-buttons">
+                    <button class="status-btn" onclick="updateStatus('pending')" data-status="pending">⏳ Ожидает</button>
+                    <button class="status-btn" onclick="updateStatus('processing')" data-status="processing">🔄 Обрабатывается</button>
+                    <button class="status-btn" onclick="updateStatus('shipped')" data-status="shipped">🚚 Отправлен</button>
+                    <button class="status-btn" onclick="updateStatus('delivered')" data-status="delivered">✅ Доставлен</button>
+                    <button class="status-btn" onclick="updateStatus('cancelled')" data-status="cancelled">❌ Отменен</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="order-services">
+            <h2 class="order-services-title">Услуги в заявке</h2>
+            
+            {{ range $index, $service := .services }}
+            <div class="order-service-item">
+                <img src="{{ $service.ImageURL }}" alt="{{ $service.Name }}" class="order-service-image" onerror="this.src='data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iODAiIGhlaWdodD0iODAiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PHJlY3Qgd2lkdGg9IjEwMCUiIGhlaWdodD0iMTAwJSIgZmlsbD0iI2Y4ZjlmYSIvPjx0ZXh0IHg9IjUwJSIgeT0iNTAlIiBmb250LWZhbWlseT0iQXJpYWwiIGZvbnQtc2l6ZT0iMTIiIGZpbGw9IiM2Yzc1N2QiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGR5PSIuM2VtIj5ObyBJbWFnZTwvdGV4dD48L3N2Zz4='">
+                <div class="order-service-info">
+                    <div class="order-service-name">{{ $service.Name }}</div>
+                    <div class="order-service-details">
+                        <strong>Цена:</strong> {{ $service.Price }} руб. | 
+                        <strong>Сроки:</strong> {{ $service.DeliveryDays }} дней | 
+                        <strong>Макс. вес:</strong> {{ $service.MaxWeight }} кг | 
+                        <strong>Макс. объем:</strong> {{ $service.MaxVolume }} м³
+                    </div>
+                    <div class="order-service-params">
+                        <div class="order-service-param">Количество: {{ index $.order.Services $index "Quantity" }}</div>
+                        <div class="order-service-param">Комментарий: {{ index $.order.Services $index "Comment" }}</div>
+                    </div>
+                </div>
+            </div>
+            {{ end }}
+        </div>
+
+        <div style="text-align: center; margin-top: 2rem;">
+            <a href="/" class="home-btn">← Вернуться к услугам</a>
+        </div>
+    </div>
+
+    <script>
+        function updateStatus(newStatus) {
+            const orderId = {{ .order.ID }};
+            
+            // Показываем загрузку
+            const statusElement = document.getElementById('order-status');
+            statusElement.textContent = 'Обновление...';
+            
+            // Отправляем запрос
+            fetch(`/api/order/${orderId}/status`, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ status: newStatus })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    // Обновляем статус на странице
+                    statusElement.textContent = newStatus;
+                    
+                    // Обновляем активную кнопку
+                    document.querySelectorAll('.status-btn').forEach(btn => {
+                        btn.classList.remove('active');
+                        if (btn.dataset.status === newStatus) {
+                            btn.classList.add('active');
+                        }
+                    });
+                    
+                    // Показываем уведомление
+                    showNotification('Статус успешно обновлен!', 'success');
+                } else {
+                    showNotification('Ошибка обновления статуса: ' + data.error, 'error');
+                    statusElement.textContent = '{{ .order.Status }}'; // Возвращаем старый статус
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                showNotification('Ошибка соединения', 'error');
+                statusElement.textContent = '{{ .order.Status }}'; // Возвращаем старый статус
+            });
+        }
+        
+        function showNotification(message, type) {
+            // Создаем уведомление
+            const notification = document.createElement('div');
+            notification.className = `notification ${type}`;
+            notification.textContent = message;
+            
+            // Добавляем стили
+            notification.style.cssText = `
+                position: fixed;
+                top: 20px;
+                right: 20px;
+                padding: 15px 20px;
+                border-radius: 5px;
+                color: white;
+                font-weight: bold;
+                z-index: 1000;
+                animation: slideIn 0.3s ease-out;
+            `;
+            
+            if (type === 'success') {
+                notification.style.backgroundColor = '#4CAF50';
+            } else {
+                notification.style.backgroundColor = '#f44336';
+            }
+            
+            // Добавляем анимацию
+            const style = document.createElement('style');
+            style.textContent = `
+                @keyframes slideIn {
+                    from { transform: translateX(100%); opacity: 0; }
+                    to { transform: translateX(0); opacity: 1; }
+                }
+            `;
+            document.head.appendChild(style);
+            
+            document.body.appendChild(notification);
+            
+            // Удаляем через 3 секунды
+            setTimeout(() => {
+                notification.remove();
+            }, 3000);
+        }
+        
+        // Выделяем активную кнопку при загрузке страницы
+        document.addEventListener('DOMContentLoaded', function() {
+            const currentStatus = '{{ .order.Status }}';
+            document.querySelectorAll('.status-btn').forEach(btn => {
+                if (btn.dataset.status === currentStatus) {
+                    btn.classList.add('active');
+                }
+            });
+        });
+    </script>
+</body>
+</html> 
