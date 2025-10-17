@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ .service.Name }} - GruzDelivery</title>
+    <link rel="stylesheet" href="/static/css/style.css">
+</head>
+<body>
+    <header class="header">
+        <a href="/" class="logo">
+            <div class="logo-icon">🚚</div>
+            GruzDelivery
+        </a>
+        <div class="header-actions">
+            <a href="/" class="home-btn">🏠 Главная</a>
+        </div>
+    </header>
+
+    <div class="container">
+        <div class="service-detail">
+            <img src="{{ .service.ImageURL }}" alt="{{ .service.Name }}" class="service-detail-image" onerror="this.src='data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iODAwIiBoZWlnaHQ9IjQwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSIjZjhmOWZhIi8+PHRleHQgeD0iNTAlIiB5PSI1MCUiIGZvbnQtZmFtaWx5PSJBcmlhbCIgZm9udC1zaXplPSIyNCIgZmlsbD0iIzZjNzU3ZCIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZHk9Ii4zZW0iPk5vIEltYWdlPC90ZXh0Pjwvc3ZnPg=='">
+            <div class="service-detail-content">
+                <h1 class="service-detail-title">{{ .service.Name }}</h1>
+                <p class="service-detail-description">{{ .service.Description }}</p>
+                
+                <div class="service-specs">
+                    <div class="spec-item">
+                        <div class="spec-label">Сроки доставки</div>
+                        <div class="spec-value">{{ .service.DeliveryDays }} дней</div>
+                    </div>
+                    <div class="spec-item">
+                        <div class="spec-label">Максимальный вес</div>
+                        <div class="spec-value">{{ .service.MaxWeight }} кг</div>
+                    </div>
+                    <div class="spec-item">
+                        <div class="spec-label">Максимальный объем</div>
+                        <div class="spec-value">{{ .service.MaxVolume }} м³</div>
+                    </div>
+                </div>
+
+                <div class="service-actions">
+                    <a href="/" class="details-link">← Вернуться к услугам</a>
+                    <button class="consult-btn">Получить консультацию</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
