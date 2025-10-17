@@ -1,0 +1,42 @@
+{
+    "swagger": "2.0",
+    "info": {
+        "description": "API for cargo transportation service",
+        "title": "RIP Go API",
+        "contact": {
+            "name": "API Support",
+            "email": "support@example.com"
+        },
+        "version": "1.0"
+    },
+    "host": "localhost:8083",
+    "basePath": "/",
+    "paths": {},
+    "securityDefinitions": {
+        "BearerAuth": {
+            "type": "apiKey",
+            "name": "Authorization",
+            "in": "header",
+            "description": "Bearer token for authentication. Format: 'Bearer <token>'"
+        }
+    },
+    "tags": [
+        {
+            "name": "auth",
+            "description": "Authentication endpoints"
+        },
+        {
+            "name": "orders",
+            "description": "Order management endpoints"
+        },
+        {
+            "name": "services",
+            "description": "Service management endpoints"
+        },
+        {
+            "name": "users",
+            "description": "User management endpoints"
+        }
+    ]
+}
+
