@@ -1,0 +1,13 @@
+ServiceHost = "0.0.0.0"
+ServicePort = 8083
+
+# JWT Configuration
+JWTSecret = "your-secret-key-change-in-production"
+JWTAccessTokenExpire = 15  # minutes
+JWTRefreshTokenExpire = 7  # days
+
+# Redis Configuration
+RedisHost = "localhost"
+RedisPort = 6379
+RedisPassword = ""
+RedisDB = 0

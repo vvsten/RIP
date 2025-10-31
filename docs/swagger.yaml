@@ -1,0 +1,341 @@
+basePath: /
+definitions:
+  ds.User:
+    properties:
+      created_at:
+        type: string
+      email:
+        type: string
+      id:
+        type: integer
+      login:
+        type: string
+      name:
+        type: string
+      phone:
+        type: string
+      role:
+        description: buyer, manager, admin
+        type: string
+      updated_at:
+        type: string
+      uuid:
+        type: string
+    type: object
+  service.AuthResponse:
+    properties:
+      access_token:
+        type: string
+      expires_at:
+        type: string
+      refresh_token:
+        type: string
+      user:
+        $ref: '#/definitions/ds.User'
+    type: object
+  service.LoginRequest:
+    properties:
+      login:
+        type: string
+      password:
+        type: string
+    required:
+    - login
+    - password
+    type: object
+  service.RegisterRequest:
+    properties:
+      email:
+        type: string
+      login:
+        type: string
+      name:
+        type: string
+      password:
+        minLength: 6
+        type: string
+      phone:
+        type: string
+      role:
+        type: string
+    required:
+    - email
+    - login
+    - name
+    - password
+    type: object
+host: localhost:8083
+info:
+  contact: {}
+  description: API for cargo transportation service
+  title: RIP Go API
+  version: "1.0"
+paths:
+  /api/orders:
+    get:
+      consumes:
+      - application/json
+      description: Get logistic requests list with filtering by status and date range
+      parameters:
+      - description: Logistic request status filter
+        in: query
+        name: status
+        type: string
+      - description: Date from (YYYY-MM-DD)
+        in: query
+        name: date_from
+        type: string
+      - description: Date to (YYYY-MM-DD)
+        in: query
+        name: date_to
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Logistic requests retrieved successfully
+          schema:
+            additionalProperties: true
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "403":
+          description: Forbidden
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Get logistic requests list
+      tags:
+      - logistic-requests
+  /api/orders/{id}/complete:
+    put:
+      consumes:
+      - application/json
+      description: Complete or reject logistic request by moderator
+      parameters:
+      - description: Logistic request ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Logistic request status (completed/rejected)
+        in: body
+        name: request
+        required: true
+        schema:
+          additionalProperties:
+            type: string
+          type: object
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Logistic request completed successfully
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "400":
+          description: Invalid request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "403":
+          description: Forbidden
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Complete or reject logistic request
+      tags:
+      - logistic-requests
+  /api/submitcargoorder:
+    post:
+      consumes:
+      - application/json
+      description: Submit a new cargo transportation logistic request
+      parameters:
+      - description: Logistic request data with services
+        in: body
+        name: request
+        required: true
+        schema:
+          additionalProperties: true
+          type: object
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Logistic request submitted successfully
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Invalid request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Submit cargo logistic request
+      tags:
+      - logistic-requests
+  /login:
+    post:
+      consumes:
+      - application/json
+      description: Authenticate user with login and password
+      parameters:
+      - description: Login credentials
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/service.LoginRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Login successful
+          schema:
+            $ref: '#/definitions/service.AuthResponse'
+        "400":
+          description: Invalid request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "401":
+          description: Invalid credentials
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: User login
+      tags:
+      - auth
+  /logout:
+    post:
+      consumes:
+      - application/json
+      description: Logout user and invalidate tokens
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Logout successful
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: User logout
+      tags:
+      - auth
+  /refresh:
+    post:
+      consumes:
+      - application/json
+      description: Refresh access token using refresh token
+      parameters:
+      - description: Refresh token
+        in: body
+        name: request
+        required: true
+        schema:
+          additionalProperties:
+            type: string
+          type: object
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Tokens refreshed successfully
+          schema:
+            $ref: '#/definitions/service.AuthResponse'
+        "400":
+          description: Invalid request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "401":
+          description: Invalid refresh token
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Refresh access token
+      tags:
+      - auth
+  /sign_up:
+    post:
+      consumes:
+      - application/json
+      description: Register a new user with login, email, password and other details
+      parameters:
+      - description: Registration data
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/service.RegisterRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: User registered successfully
+          schema:
+            $ref: '#/definitions/service.AuthResponse'
+        "400":
+          description: Invalid request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "409":
+          description: User already exists
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Register new user
+      tags:
+      - auth
+securityDefinitions:
+  BearerAuth:
+    description: 'Bearer token for authentication. Format: ''Bearer <token>'''
+    in: header
+    name: Authorization
+    type: apiKey
+swagger: "2.0"

@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
+    <title>Главная страница - GruzDelivery</title>
+    <link rel="stylesheet" href="/static/css/style.css?v=14">
+</head>
+<body>
+    <header class="header">
+        <a href="/" class="logo">
+            <div class="logo-icon">🚚</div>
+            GruzDelivery
+        </a>
+    </header>
+
+    <div class="container">
+        <!-- Калькулятор в правом верхнем углу -->
+        <div class="calculator-shortcut">
+            <a class="calculator-btn is-disabled" id="calculatorBtn">
+                🧮 Калькулятор
+                <span class="cart-count" id="cartCount">0</span>
+            </a>
+        </div>
+
+        <!-- Поиск -->
+        <div class="search-section">
+            <form class="search-form" method="POST" action="/api/searchtrans">
+                <input 
+                    type="text" 
+                    name="search_query" 
+                    class="search-input" 
+                    placeholder="Поиск типа транспорта (фура, авиа, поезд...)" 
+                    value="{{ .search }}"
+                >
+                <input type="hidden" name="transport_type" value="">
+                <button type="submit" class="search-btn">🔍</button>
+            </form>
+        </div>
+
+
+        <!-- Сетка услуг -->
+        <div class="services-grid">
+            {{ range .services }}
+            <div class="service-card">
+                <img src="{{ .ImageURL }}" alt="{{ .Name }}" class="service-image" onerror="this.src='data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMzAwIiBoZWlnaHQ9IjIwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSIjZjhmOWZhIi8+PHRleHQgeD0iNTAlIiB5PSI1MCUiIGZvbnQtZmFtaWx5PSJBcmlhbCIgZm9udC1zaXplPSIxNCIgZmlsbD0iIzZjNzU3ZCIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZHk9Ii4zZW0iPk5vIEltYWdlPC90ZXh0Pjwvc3ZnPg=='">
+                <div class="service-content">
+                    <h3 class="service-title">{{ .Name }}</h3>
+                    <p class="service-description">{{ .Description }}</p>
+                    <div class="service-actions">
+                        <a href="/service/{{ .ID }}" class="details-link">подробнее</a>
+                        <button class="consult-btn" data-service-id="{{.ID}}">Получить консультацию</button>
+                    </div>
+                </div>
+            </div>
+            {{ end }}
+        </div>
+
+        {{ if not .services }}
+        <div class="no-results">
+            <h2>Услуги не найдены</h2>
+            <p>Попробуйте изменить поисковый запрос</p>
+        </div>
+        {{ end }}
+    </div>
+
+    <script>
+        // Функция для добавления услуги в корзину
+        async function addToCart(serviceId) {
+            try {
+                const response = await fetch(`/api/cart/add/${serviceId}`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    }
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    // Обновляем счетчик и подтягиваем id корзины
+                    updateCartCount(data.count);
+                    loadCartCount();
+                    
+                    // Показываем уведомление
+                    showNotification(data.message);
+                } else {
+                    showNotification('Ошибка: ' + data.error, 'error');
+                }
+            } catch (error) {
+                console.error('Ошибка при добавлении в корзину:', error);
+                showNotification('Произошла ошибка при добавлении в корзину', 'error');
+            }
+        }
+
+        // Функция для обновления счетчика корзины
+        function updateCartCount(count, cartId) {
+            const cartCountElement = document.getElementById('cartCount');
+            toggleCalculatorBtn(count, cartId);
+            if (cartCountElement) {
+                if (count > 0) {
+                    cartCountElement.textContent = count;
+                    cartCountElement.style.display = 'flex';
+                    // Добавляем анимацию пульсации
+                    cartCountElement.style.animation = 'pulse 0.3s ease-in-out';
+                } else {
+                    cartCountElement.textContent = '';
+                    cartCountElement.style.display = 'none';
+                }
+            }
+        }
+
+        // Функция для показа уведомлений
+        function showNotification(message, type = 'success') {
+            // Создаем элемент уведомления
+            const notification = document.createElement('div');
+            notification.className = `notification ${type}`;
+            notification.textContent = message;
+            
+            // Добавляем стили
+            notification.style.cssText = `
+                position: fixed;
+                top: 20px;
+                right: 20px;
+                padding: 15px 20px;
+                border-radius: 5px;
+                color: white;
+                font-weight: bold;
+                z-index: 1000;
+                opacity: 0;
+                transition: opacity 0.3s ease;
+                ${type === 'success' ? 'background-color: #4CAF50;' : 'background-color: #f44336;'}
+            `;
+            
+            document.body.appendChild(notification);
+            
+            // Показываем уведомление
+            setTimeout(() => {
+                notification.style.opacity = '1';
+            }, 100);
+            
+            // Скрываем через 3 секунды
+            setTimeout(() => {
+                notification.style.opacity = '0';
+                setTimeout(() => {
+                    document.body.removeChild(notification);
+                }, 300);
+            }, 3000);
+        }
+
+        // Загружаем количество в корзине при загрузке страницы
+        async function loadCartCount() {
+            try {
+                const response = await fetch('/api/cart');
+                const data = await response.json();
+                const cartId = data?.cart?.id || data?.id || undefined;
+                const count = data?.count ?? 0;
+                updateCartCount(count, cartId);
+            } catch (error) {
+                console.error('Ошибка при загрузке количества в корзине:', error);
+            }
+        }
+
+
+        // Обработчики для кнопок добавления в корзину
+        document.addEventListener('click', function(e) {
+            if (e.target.classList.contains('consult-btn')) {
+                const serviceId = e.target.getAttribute('data-service-id');
+                if (serviceId) {
+                    addToCart(parseInt(serviceId));
+                }
+            }
+        });
+
+        // Загружаем количество в корзине при загрузке страницы
+        document.addEventListener('DOMContentLoaded', loadCartCount);
+
+        // Переключение доступности кнопки калькулятора в зависимости от количества в корзине
+        function toggleCalculatorBtn(count, cartId) {
+            const btn = document.getElementById('calculatorBtn');
+            if (!btn) return;
+            if (count > 0) {
+                btn.classList.remove('is-disabled');
+                btn.setAttribute('aria-disabled', 'false');
+                const href = cartId ? `/calculator?order_id=${cartId}` : '/calculator';
+                btn.setAttribute('href', href);
+                btn.style.pointerEvents = 'auto';
+                btn.style.backgroundColor = '';
+            } else {
+                btn.classList.add('is-disabled');
+                btn.setAttribute('aria-disabled', 'true');
+                // Чтобы не было перехода, но сохранился вид ссылки
+                btn.removeAttribute('href');
+                btn.style.pointerEvents = 'none';
+                // Принудительно задаем серый цвет, если специфичность CSS мешает
+                btn.style.backgroundColor = '#adb5bd';
+            }
+        }
+    </script>
+</body>
+</html>
