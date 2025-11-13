@@ -1,0 +1,26 @@
+# Dependencies
+node_modules/
+frontend/node_modules/
+src-tauri/target/
+
+# Build outputs
+frontend/dist/
+frontend/.vite/
+*.log
+
+# Environment
+.env
+.env.local
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Tauri
+src-tauri/target/
