@@ -5,6 +5,7 @@ on:
     branches:
       - main
       - master
+      - "Lab-6Внедрение-адаптивности-и-развертывание-приложения"
   workflow_dispatch:
 
 permissions:
@@ -39,7 +40,7 @@ jobs:
         run: npm run build
         env:
           NODE_ENV: production
-          VITE_BASE_URL: /${{ github.event.repository.name }}/
+          VITE_BASE_URL: /RIP/
       
       - name: Setup Pages
         uses: actions/configure-pages@v4
