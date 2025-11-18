@@ -1,0 +1,57 @@
+import { useEffect, useState } from 'react';
+import { Link } from 'react-router-dom';
+
+/**
+ * Кнопка калькулятора/корзины как в шаблоне index.html
+ * Справа вверху, с бэйджем количества
+ */
+export function CalculatorShortcut() {
+  const [count, setCount] = useState<number>(0);
+  const [orderId, setOrderId] = useState<number | null>(null);
+
+  useEffect(() => {
+    const load = async () => {
+      try {
+        // Совместимость: пробуем /api/cart (вернет id и count) и /api/cart/count
+        const res = await fetch('/api/cart');
+        if (res.ok) {
+          const data = await res.json();
+          const c = typeof data?.count === 'number' ? data.count : 0;
+          const id = data?.cart?.id || data?.id || null;
+          setCount(c);
+          setOrderId(id);
+          return;
+        }
+      } catch {}
+      try {
+        const res2 = await fetch('/api/cart/count');
+        if (res2.ok) {
+          const data2 = await res2.json();
+          setCount(typeof data2?.count === 'number' ? data2.count : 0);
+        }
+      } catch {}
+    };
+    load();
+  }, []);
+
+  const href = orderId ? `/calculator?order_id=${orderId}` : '/calculator';
+  const isDisabled = count <= 0;
+
+  return (
+    <div className="calculator-shortcut">
+      {isDisabled ? (
+        <a className="calculator-btn is-disabled" aria-disabled="true">
+          🧮 Калькулятор
+          <span className="cart-count" id="cartCount">{count || ''}</span>
+        </a>
+      ) : (
+        <Link to={href} className="calculator-btn">
+          🧮 Калькулятор
+          <span className="cart-count" id="cartCount">{count}</span>
+        </Link>
+      )}
+    </div>
+  );
+}
+
+
