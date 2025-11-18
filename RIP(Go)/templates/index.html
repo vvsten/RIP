@@ -43,8 +43,8 @@
 
 
         <!-- Сетка услуг -->
-        <div class="services-grid">
-            {{ range .services }}
+        <div class="TransportService-grid">
+            {{ range .TransportService }}
             <div class="service-card">
                 <img src="{{ .ImageURL }}" alt="{{ .Name }}" class="service-image" onerror="this.src='data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMzAwIiBoZWlnaHQ9IjIwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSIjZjhmOWZhIi8+PHRleHQgeD0iNTAlIiB5PSI1MCUiIGZvbnQtZmFtaWx5PSJBcmlhbCIgZm9udC1zaXplPSIxNCIgZmlsbD0iIzZjNzU3ZCIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZHk9Ii4zZW0iPk5vIEltYWdlPC90ZXh0Pjwvc3ZnPg=='">
                 <div class="service-content">
@@ -59,7 +59,7 @@
             {{ end }}
         </div>
 
-        {{ if not .services }}
+        {{ if not .TransportService }}
         <div class="no-results">
             <h2>Услуги не найдены</h2>
             <p>Попробуйте изменить поисковый запрос</p>

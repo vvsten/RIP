@@ -43,14 +43,14 @@ func StartServer() {
 	r.POST("/api/submitcargoorder", handler.SubmitOrder) // Отправка заявки на грузоперевозку
 
 	// API маршруты для заявок (специфичные роуты сначала)
-	r.GET("/api/orders", handler.GetOrders)              // Получение списка заявок
-	r.PUT("/api/orders/:id/form", handler.FormOrder)     // Формирование заявки создателем
-	r.PUT("/api/orders/:id/complete", handler.CompleteOrder) // Завершение/отклонение заявки модератором
-	r.DELETE("/api/orders/:id/services/:service_id", handler.RemoveServiceFromOrder) // Удаление услуги из заявки
-	r.PUT("/api/orders/:id/services/:service_id", handler.UpdateOrderService)        // Изменение услуги в заявке
-	r.GET("/api/orders/:id", handler.GetOrder)           // Получение одной заявки
-	r.PUT("/api/orders/:id", handler.UpdateOrder)        // Изменение полей заявки
-	r.DELETE("/api/orders/:id", handler.DeleteOrder)     // Удаление заявки
+	r.GET("/api/LogisticRequest", handler.GetOrders)              // Получение списка заявок
+	r.PUT("/api/LogisticRequest/:id/form", handler.FormOrder)     // Формирование заявки создателем
+	r.PUT("/api/LogisticRequest/:id/complete", handler.CompleteOrder) // Завершение/отклонение заявки модератором
+	r.DELETE("/api/LogisticRequest/:id/TransportService/:service_id", handler.RemoveServiceFromOrder) // Удаление услуги из заявки
+	r.PUT("/api/LogisticRequest/:id/TransportService/:service_id", handler.UpdateOrderService)        // Изменение услуги в заявке
+	r.GET("/api/LogisticRequest/:id", handler.GetOrder)           // Получение одной заявки
+	r.PUT("/api/LogisticRequest/:id", handler.UpdateOrder)        // Изменение полей заявки
+	r.DELETE("/api/LogisticRequest/:id", handler.DeleteOrder)     // Удаление заявки
 
 	// API маршруты для пользователей
 	r.POST("/api/users/register", handler.RegisterUser)   // Регистрация пользователя

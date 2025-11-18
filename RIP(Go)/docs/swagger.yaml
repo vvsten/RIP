@@ -71,11 +71,11 @@ info:
   title: RIP Go API
   version: "1.0"
 paths:
-  /api/orders:
+  /api/LogisticRequest:
     get:
       consumes:
       - application/json
-      description: Get orders list with filtering by status and date range
+      description: Get LogisticRequest list with filtering by status and date range
       parameters:
       - description: Order status filter
         in: query
@@ -111,10 +111,10 @@ paths:
             type: object
       security:
       - BearerAuth: []
-      summary: Get orders list
+      summary: Get LogisticRequest list
       tags:
-      - orders
-  /api/orders/{id}/complete:
+      - LogisticRequest
+  /api/LogisticRequest/{id}/complete:
     put:
       consumes:
       - application/json
@@ -164,14 +164,14 @@ paths:
       - BearerAuth: []
       summary: Complete or reject order
       tags:
-      - orders
+      - LogisticRequest
   /api/submitcargoorder:
     post:
       consumes:
       - application/json
       description: Submit a new cargo transportation order
       parameters:
-      - description: Order data with services
+      - description: Order data with TransportService
         in: body
         name: request
         required: true
@@ -202,7 +202,7 @@ paths:
       - BearerAuth: []
       summary: Submit cargo order
       tags:
-      - orders
+      - LogisticRequest
   /login:
     post:
       consumes:

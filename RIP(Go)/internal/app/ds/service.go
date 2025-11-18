@@ -12,9 +12,14 @@ type Service struct {
 	DeliveryDays int     `json:"delivery_days" gorm:"not null"`
 	MaxWeight    float64 `json:"max_weight" gorm:"not null"`
 	MaxVolume    float64 `json:"max_volume" gorm:"not null"`
-	
+
 	// Системные поля
 	CreatedAt time.Time  `json:"created_at" gorm:"autoCreateTime"`
 	UpdatedAt time.Time  `json:"updated_at" gorm:"autoUpdateTime"`
 	DeletedAt *time.Time `json:"-" gorm:"index"`
+}
+
+// TableName переопределяет имя таблицы для Service
+func (Service) TableName() string {
+	return "TransportService"
 }

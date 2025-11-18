@@ -1,6 +1,9 @@
 package main
 
 import (
+	"log"
+	"strings"
+
 	"github.com/joho/godotenv"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
@@ -14,6 +17,11 @@ func main() {
 	if err != nil {
 		panic("failed to connect database")
 	}
+
+	// Переименовываем таблицы, если старые имена ещё используются
+	ensureRenamed(db, "services", "TransportService")
+	ensureRenamed(db, "orders", "LogisticRequest")
+	ensureRenamed(db, "order_services", "order_TransportService")
 
 	// Обновляем существующие записи с NULL creator_id
 	db.Model(&ds.Order{}).Where("creator_id IS NULL OR creator_id = 0").Updates(map[string]interface{}{
@@ -62,7 +70,7 @@ func main() {
 	}
 
 	// Создаем начальные данные
-	services := []ds.Service{
+	TransportService := []ds.Service{
 		{
 			ID:           1,
 			Name:         "Фура",
@@ -126,7 +134,7 @@ func main() {
 	}
 
 	// Создаем услуги в БД
-	for _, service := range services {
+	for _, service := range TransportService {
 		var existingService ds.Service
 		err := db.Where("id = ?", service.ID).First(&existingService).Error
 		if err != nil {
@@ -166,4 +174,45 @@ func main() {
 	}
 
 	println("Migration completed successfully!")
+}
+
+// ensureRenamed переименовывает таблицу, если она существует со старым именем
+func ensureRenamed(db *gorm.DB, oldName, newName string) {
+	oldNameLower := strings.ToLower(oldName)
+	newNameLower := strings.ToLower(newName)
+
+	oldExists, err := tableExists(db, oldNameLower)
+	if err != nil {
+		log.Printf("skip rename %s -> %s: %v", oldName, newName, err)
+		return
+	}
+
+	if !oldExists {
+		return
+	}
+
+	newExists, err := tableExists(db, newNameLower)
+	if err != nil {
+		log.Printf("skip rename %s -> %s: %v", oldName, newName, err)
+		return
+	}
+
+	if newExists {
+		return
+	}
+
+	if err := db.Exec("ALTER TABLE " + oldName + " RENAME TO " + newName).Error; err != nil {
+		log.Printf("failed to rename %s -> %s: %v", oldName, newName, err)
+	}
+}
+
+func tableExists(db *gorm.DB, tableName string) (bool, error) {
+	var exists bool
+	err := db.Raw(`
+        SELECT EXISTS (
+            SELECT 1
+            FROM information_schema.tables
+            WHERE table_schema = 'public' AND table_name = ?
+        )`, tableName).Scan(&exists).Error
+	return exists, err
 }

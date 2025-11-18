@@ -15,14 +15,14 @@ const docTemplate = `{
     "host": "{{.Host}}",
     "basePath": "{{.BasePath}}",
     "paths": {
-        "/api/orders": {
+        "/api/LogisticRequest": {
             "get": {
                 "security": [
                     {
                         "BearerAuth": []
                     }
                 ],
-                "description": "Get orders list with filtering by status and date range",
+                "description": "Get LogisticRequest list with filtering by status and date range",
                 "consumes": [
                     "application/json"
                 ],
@@ -30,9 +30,9 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "orders"
+                    "LogisticRequest"
                 ],
-                "summary": "Get orders list",
+                "summary": "Get LogisticRequest list",
                 "parameters": [
                     {
                         "type": "string",
@@ -82,7 +82,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/api/orders/{id}/complete": {
+        "/api/LogisticRequest/{id}/complete": {
             "put": {
                 "security": [
                     {
@@ -97,7 +97,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "orders"
+                    "LogisticRequest"
                 ],
                 "summary": "Complete or reject order",
                 "parameters": [
@@ -176,12 +176,12 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "orders"
+                    "LogisticRequest"
                 ],
                 "summary": "Submit cargo order",
                 "parameters": [
                     {
-                        "description": "Order data with services",
+                        "description": "Order data with TransportService",
                         "name": "request",
                         "in": "body",
                         "required": true,
