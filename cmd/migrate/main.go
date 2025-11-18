@@ -1,6 +1,8 @@
 package main
 
 import (
+	"fmt"
+
 	"github.com/joho/godotenv"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
@@ -13,6 +15,19 @@ func main() {
 	db, err := gorm.Open(postgres.Open(dsn.FromEnv()), &gorm.Config{})
 	if err != nil {
 		panic("failed to connect database")
+	}
+
+	// Подготавливаем БД к новым именованиям таблиц
+	renameStatements := []string{
+		`ALTER TABLE IF EXISTS services RENAME TO "TransportService"`,
+		`ALTER TABLE IF EXISTS orders RENAME TO "LogisticRequest"`,
+		`ALTER TABLE IF EXISTS order_services RENAME TO "LogisticRequestService"`,
+		`ALTER TABLE IF EXISTS order_TransportService RENAME TO "LogisticRequestService"`,
+	}
+	for _, stmt := range renameStatements {
+		if execErr := db.Exec(stmt).Error; execErr != nil {
+			panic(fmt.Sprintf("failed to execute migration step %s: %v", stmt, execErr))
+		}
 	}
 
 	// Обновляем существующие записи с NULL creator_id
@@ -62,7 +77,7 @@ func main() {
 	}
 
 	// Создаем начальные данные
-	services := []ds.Service{
+	TransportService := []ds.Service{
 		{
 			ID:           1,
 			Name:         "Фура",
@@ -126,7 +141,7 @@ func main() {
 	}
 
 	// Создаем услуги в БД
-	for _, service := range services {
+	for _, service := range TransportService {
 		var existingService ds.Service
 		err := db.Where("id = ?", service.ID).First(&existingService).Error
 		if err != nil {

@@ -181,7 +181,7 @@ const docTemplate = `{
                 "summary": "Submit cargo logistic request",
                 "parameters": [
                     {
-                        "description": "Logistic request data with services",
+                        "description": "Logistic request data with TransportService",
                         "name": "request",
                         "in": "body",
                         "required": true,

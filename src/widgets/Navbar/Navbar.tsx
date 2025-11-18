@@ -19,8 +19,8 @@ export function Navbar() {
         {location.pathname !== '/' && (
           <Link to="/" className="home-btn">🏠 Главная</Link>
         )}
-        {location.pathname !== '/services' && (
-          <Link to="/services" className="home-btn">📦 Услуги</Link>
+        {location.pathname !== '/TransportService' && (
+          <Link to="/TransportService" className="home-btn">📦 Услуги</Link>
         )}
         {location.pathname !== '/about' && (
           <Link to="/about" className="home-btn">ℹ️ О компании</Link>

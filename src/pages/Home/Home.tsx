@@ -44,7 +44,7 @@ export function Home() {
         Почему выбирают нас:
       </h3>
       
-      <div className="services-grid" style={{ 
+      <div className="TransportService-grid" style={{ 
         gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))',
         marginBottom: '3rem'
       }}>

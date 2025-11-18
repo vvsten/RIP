@@ -43,21 +43,21 @@ func StartServer() {
 	r.POST("/api/submitcargoorder", handler.SubmitOrder) // Отправка заявки на грузоперевозку
 
     // API маршруты для заявок — старые алиасы
-    r.GET("/api/orders", handler.GetOrders)
-    r.PUT("/api/orders/:id/form", handler.FormOrder)
-    r.PUT("/api/orders/:id/complete", handler.CompleteOrder)
-    r.DELETE("/api/orders/:id/services/:service_id", handler.RemoveServiceFromOrder)
-    r.PUT("/api/orders/:id/services/:service_id", handler.UpdateOrderService)
-    r.GET("/api/orders/:id", handler.GetOrder)
-    r.PUT("/api/orders/:id", handler.UpdateOrder)
-    r.DELETE("/api/orders/:id", handler.DeleteOrder)
+    r.GET("/api/LogisticRequest", handler.GetOrders)
+    r.PUT("/api/LogisticRequest/:id/form", handler.FormOrder)
+    r.PUT("/api/LogisticRequest/:id/complete", handler.CompleteOrder)
+    r.DELETE("/api/LogisticRequest/:id/TransportService/:service_id", handler.RemoveServiceFromOrder)
+    r.PUT("/api/LogisticRequest/:id/TransportService/:service_id", handler.UpdateOrderService)
+    r.GET("/api/LogisticRequest/:id", handler.GetOrder)
+    r.PUT("/api/LogisticRequest/:id", handler.UpdateOrder)
+    r.DELETE("/api/LogisticRequest/:id", handler.DeleteOrder)
 
     // Новые маршруты для логистических заявок
     r.GET("/api/logistic-requests", handler.GetOrders)
     r.PUT("/api/logistic-requests/:id/form", handler.FormOrder)
     r.PUT("/api/logistic-requests/:id/complete", handler.CompleteOrder)
-    r.DELETE("/api/logistic-requests/:id/services/:service_id", handler.RemoveServiceFromOrder)
-    r.PUT("/api/logistic-requests/:id/services/:service_id", handler.UpdateOrderService)
+    r.DELETE("/api/logistic-requests/:id/TransportService/:service_id", handler.RemoveServiceFromOrder)
+    r.PUT("/api/logistic-requests/:id/TransportService/:service_id", handler.UpdateOrderService)
     r.GET("/api/logistic-requests/:id", handler.GetOrder)
     r.PUT("/api/logistic-requests/:id", handler.UpdateOrder)
     r.DELETE("/api/logistic-requests/:id", handler.DeleteOrder)

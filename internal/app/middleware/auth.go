@@ -182,7 +182,7 @@ func (am *AuthMiddleware) RequireModerator() gin.HandlerFunc {
 		if claims.Role != ds.RoleManager && claims.Role != ds.RoleAdmin {
 			c.JSON(http.StatusForbidden, gin.H{
 				"status":  "error",
-				"message": "Insufficient permissions - only moderators can complete orders",
+				"message": "Insufficient permissions - only moderators can complete LogisticRequest",
 			})
 			c.Abort()
 			return

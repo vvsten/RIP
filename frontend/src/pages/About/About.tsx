@@ -85,7 +85,7 @@ export function About() {
           Наши преимущества
         </h2>
         
-        <div className="services-grid" style={{ 
+        <div className="TransportService-grid" style={{ 
           gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))'
         }}>
           <div style={{

@@ -6,9 +6,9 @@ import { useLocation, Link } from 'react-router-dom';
  */
 const BREADCRUMBS_CONFIG: Record<string, Array<{ label: string; path: string }>> = {
   '/': [{ label: 'Главная', path: '/' }],
-  '/services': [
+  '/TransportService': [
     { label: 'Главная', path: '/' },
-    { label: 'Услуги', path: '/services' }
+    { label: 'Услуги', path: '/TransportService' }
   ],
   '/about': [
     { label: 'Главная', path: '/' },

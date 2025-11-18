@@ -41,7 +41,7 @@ func fail(ctx *gin.Context, code int, message string) {
 func (h *Handler) GetServices(ctx *gin.Context) {
 	search := ctx.Query("search") // получаем параметр поиска из URL
 	
-	services, err := h.Repository.GetServices(search)
+	TransportService, err := h.Repository.GetServices(search)
 	if err != nil {
 		logrus.Error(err)
 		ctx.HTML(http.StatusInternalServerError, "error.html", gin.H{
@@ -51,7 +51,7 @@ func (h *Handler) GetServices(ctx *gin.Context) {
 	}
 
 	ctx.HTML(http.StatusOK, "index.html", gin.H{
-		"services": services,
+		"TransportService": TransportService,
 		"search":   search, // передаем поисковый запрос для сохранения в поле
 	})
 }
@@ -85,8 +85,8 @@ func (h *Handler) GetService(ctx *gin.Context) {
 // GetOrderDetails - страница с деталями заявки
 func (h *Handler) GetOrderDetails(ctx *gin.Context) {
 	// Получаем первую сформированную заявку для демонстрации
-	orders, err := h.Repository.GetOrders("formed", nil, nil)
-	if err != nil || len(orders) == 0 {
+	LogisticRequest, err := h.Repository.GetOrders("formed", nil, nil)
+	if err != nil || len(LogisticRequest) == 0 {
 		logrus.Error(err)
 		ctx.HTML(http.StatusInternalServerError, "error.html", gin.H{
 			"error": "Ошибка загрузки заявки",
@@ -94,10 +94,10 @@ func (h *Handler) GetOrderDetails(ctx *gin.Context) {
 		return
 	}
 
-	order := orders[0]
+	order := LogisticRequest[0]
 	ctx.HTML(http.StatusOK, "order.html", gin.H{
 		"order":    order,
-		"services": order.Services,
+		"TransportService": order.Services,
 	})
 }
 
@@ -290,15 +290,15 @@ func (h *Handler) GetCart(ctx *gin.Context) {
 		return
 	}
 
-    services, err := h.Repository.GetCartServices()
+    TransportService, err := h.Repository.GetCartServices()
 	if err != nil {
-        fail(ctx, http.StatusInternalServerError, "failed to get services in cart")
+        fail(ctx, http.StatusInternalServerError, "failed to get TransportService in cart")
 		return
 	}
 
 	ctx.JSON(http.StatusOK, gin.H{
 		"cart":     cart,
-		"services": services,
+		"TransportService": TransportService,
 		"count":    h.Repository.GetCartCount(),
 	})
 }
@@ -407,7 +407,7 @@ func (h *Handler) FormOrder(ctx *gin.Context) {
 // @Accept json
 // @Produce json
 // @Security BearerAuth
-// @Param request body map[string]interface{} true "Logistic request data with services"
+// @Param request body map[string]interface{} true "Logistic request data with TransportService"
 // @Success 201 {object} map[string]interface{} "Logistic request submitted successfully"
 // @Failure 400 {object} map[string]string "Invalid request"
 // @Failure 401 {object} map[string]string "Unauthorized"
@@ -435,7 +435,7 @@ func (h *Handler) SubmitOrder(ctx *gin.Context) {
 			Width     float64 `json:"width"`
 			Height    float64 `json:"height"`
 			Weight    float64 `json:"weight"`
-		} `json:"services"`
+		} `json:"TransportService"`
 	}
 
     if err := ctx.ShouldBindJSON(&request); err != nil {
@@ -500,7 +500,7 @@ func (h *Handler) SearchTransport(ctx *gin.Context) {
 	}
 	
 	// Поиск транспорта
-	services, err := h.Repository.GetServices(searchQuery)
+	TransportService, err := h.Repository.GetServices(searchQuery)
 	if err != nil {
         logrus.Error(err)
         if ctx.GetHeader("Content-Type") == "application/json" {
@@ -516,25 +516,25 @@ func (h *Handler) SearchTransport(ctx *gin.Context) {
 	// Фильтрация по типу транспорта если указан
 	if transportType != "" {
 		var filtered []ds.Service
-		for _, service := range services {
+		for _, service := range TransportService {
 			if strings.Contains(strings.ToLower(service.Name), strings.ToLower(transportType)) {
 				filtered = append(filtered, service)
 			}
 		}
-		services = filtered
+		TransportService = filtered
 	}
 
 	// Возвращаем результат в зависимости от типа запроса
 	if ctx.GetHeader("Content-Type") == "application/json" {
         ctx.JSON(http.StatusOK, gin.H{
             "status": "ok",
-            "transports": services,
-            "count": len(services),
+            "transports": TransportService,
+            "count": len(TransportService),
         })
 	} else {
 		// Возвращаем HTML страницу с результатами
 		ctx.HTML(http.StatusOK, "index.html", gin.H{
-			"services": services,
+			"TransportService": TransportService,
 			"search":   searchQuery,
 		})
 	}
@@ -699,14 +699,14 @@ func (h *Handler) GetAllServicesJSON(ctx *gin.Context) {
     }
     
     // Получаем отфильтрованные услуги из репозитория
-    services, err := h.Repository.GetServicesWithFilters(search, minPrice, maxPrice, dateFrom, dateTo)
+    TransportService, err := h.Repository.GetServicesWithFilters(search, minPrice, maxPrice, dateFrom, dateTo)
     if err != nil {
-        logrus.Error("Error getting services:", err)
-        fail(ctx, http.StatusInternalServerError, "failed to get services")
+        logrus.Error("Error getting TransportService:", err)
+        fail(ctx, http.StatusInternalServerError, "failed to get TransportService")
         return
     }
     
-    ctx.JSON(http.StatusOK, gin.H{"status": "ok", "services": services})
+    ctx.JSON(http.StatusOK, gin.H{"status": "ok", "TransportService": TransportService})
 }
 
 // ==================== ПОЛЬЗОВАТЕЛИ ====================
@@ -976,9 +976,9 @@ func (h *Handler) GetOrders(ctx *gin.Context) {
         }
     }
 
-    orders, err := h.Repository.GetOrders(status, dateFrom, dateTo)
+    LogisticRequest, err := h.Repository.GetOrders(status, dateFrom, dateTo)
     if err != nil {
-        fail(ctx, http.StatusInternalServerError, "failed to get orders")
+        fail(ctx, http.StatusInternalServerError, "failed to get LogisticRequest")
         return
     }
 
@@ -992,16 +992,16 @@ func (h *Handler) GetOrders(ctx *gin.Context) {
         }
         
         var userOrders []ds.Order
-        for _, order := range orders {
+        for _, order := range LogisticRequest {
             if order.CreatorID == user.ID {
                 userOrders = append(userOrders, order)
             }
         }
-        orders = userOrders
+        LogisticRequest = userOrders
     }
     // Manager и Admin видят все заявки
 
-    ctx.JSON(http.StatusOK, gin.H{"status": "ok", "orders": orders})
+    ctx.JSON(http.StatusOK, gin.H{"status": "ok", "LogisticRequest": LogisticRequest})
 }
 
 // GetOrder - получение заявки по ID
@@ -1052,7 +1052,7 @@ func (h *Handler) UpdateOrder(ctx *gin.Context) {
     }
 
     if order.Status != ds.StatusDraft {
-        fail(ctx, http.StatusBadRequest, "can only update draft orders")
+        fail(ctx, http.StatusBadRequest, "can only update draft LogisticRequest")
         return
     }
 

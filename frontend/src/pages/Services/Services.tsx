@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Filters } from '../../widgets/Filters/Filters';
 import { ServiceCard } from '../../widgets/ServiceCard/ServiceCard';
-import { fetchServices } from '../../shared/api/servicesApi';
+import { fetchServices } from '../../shared/api/TransportServiceApi';
 import type { Service, ServiceFilters } from '../../shared/types/Service';
 
 /**
@@ -17,7 +17,7 @@ import type { Service, ServiceFilters } from '../../shared/types/Service';
  */
 export function Services() {
   // useState для списка услуг
-  const [services, setServices] = useState<Service[]>([]);
+  const [TransportService, setServices] = useState<Service[]>([]);
   
   // useState для состояния загрузки
   const [loading, setLoading] = useState(true);
@@ -40,13 +40,13 @@ export function Services() {
     setError(null);
     
     try {
-      // Вызываем fetchServices из servicesApi
+      // Вызываем fetchServices из TransportServiceApi
       // Функция автоматически обрабатывает fallback на mock
       const data = await fetchServices(filters);
       setServices(data);
     } catch (err) {
       setError('Не удалось загрузить услуги');
-      console.error('Error loading services:', err);
+      console.error('Error loading TransportService:', err);
     } finally {
       setLoading(false);
     }
@@ -101,14 +101,14 @@ export function Services() {
       
       {/* Список услуг */}
       {!loading && !error && (
-        services.length > 0 ? (
-          <div className="services-grid">
-            {services.map((service) => (
+        TransportService.length > 0 ? (
+          <div className="TransportService-grid">
+            {TransportService.map((service) => (
               <ServiceCard key={service.id} service={service} />
             ))}
           </div>
         ) : (
-          <div className="no-services">
+          <div className="no-TransportService">
             <h2>Услуги не найдены</h2>
             <p>Попробуйте изменить параметры фильтрации</p>
           </div>

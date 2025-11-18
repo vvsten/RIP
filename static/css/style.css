@@ -227,7 +227,7 @@ body {
 }
 
 /* Сетка услуг */
-.services-grid {
+.TransportService-grid {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(300px, 350px));
     gap: 2rem;
@@ -495,11 +495,11 @@ body {
 }
 
 /* Услуги в заявке */
-.order-services {
+.order-TransportService {
     margin-top: 2rem;
 }
 
-.order-services-title {
+.order-TransportService-title {
     font-size: 1.25rem;
     font-weight: bold;
     margin-bottom: 1rem;
@@ -669,7 +669,7 @@ body {
 }
 
 /* Выбранные услуги */
-.selected-services {
+.selected-TransportService {
     background-color: var(--card-bg);
     border: 2px solid var(--border-color);
     border-radius: 6px;
@@ -731,13 +731,13 @@ body {
     background-color: #c82333;
 }
 
-.no-services {
+.no-TransportService {
     text-align: center;
     color: var(--text-secondary);
     padding: 1rem;
 }
 
-.add-services-link {
+.add-TransportService-link {
     color: var(--accent-blue);
     text-decoration: none;
     font-weight: 500;
@@ -746,7 +746,7 @@ body {
     transition: color 0.2s;
 }
 
-.add-services-link:hover {
+.add-TransportService-link:hover {
     color: #0b5ed7;
     text-decoration: underline;
 }
@@ -761,7 +761,7 @@ body {
 }
 
 /* Таблица услуг */
-.services-table-container {
+.TransportService-table-container {
     background-color: var(--card-bg);
     border-radius: 8px;
     box-shadow: 0 2px 8px rgba(0,0,0,0.1);
@@ -769,14 +769,14 @@ body {
     overflow: visible;
 }
 
-.services-table {
+.TransportService-table {
     width: 100%;
     border-collapse: collapse;
     margin: 0;
     table-layout: auto;
 }
 
-.services-table th {
+.TransportService-table th {
     background-color: var(--primary-bg);
     padding: 1rem 1rem;
     text-align: center;
@@ -786,60 +786,60 @@ body {
     font-size: 1rem;
 }
 
-.services-table th:first-child {
+.TransportService-table th:first-child {
     text-align: left;
     width: 250px;
     min-width: 250px;
 }
 
-.services-table th:nth-child(2),
-.services-table th:nth-child(3),
-.services-table th:nth-child(4),
-.services-table th:nth-child(5) {
+.TransportService-table th:nth-child(2),
+.TransportService-table th:nth-child(3),
+.TransportService-table th:nth-child(4),
+.TransportService-table th:nth-child(5) {
     width: 120px;
     min-width: 120px;
 }
 
-.services-table th:nth-child(6),
-.services-table th:nth-child(7) {
+.TransportService-table th:nth-child(6),
+.TransportService-table th:nth-child(7) {
     width: 150px;
     min-width: 150px;
 }
 
-.services-table th:last-child {
+.TransportService-table th:last-child {
     text-align: center;
     width: 100px;
     min-width: 100px;
 }
 
-.services-table td {
+.TransportService-table td {
     padding: 1rem;
     vertical-align: middle;
     border-bottom: 1px solid var(--border-color);
     text-align: center;
 }
 
-.services-table td:first-child {
+.TransportService-table td:first-child {
     text-align: left;
     width: 250px;
     min-width: 250px;
 }
 
-.services-table td:nth-child(2),
-.services-table td:nth-child(3),
-.services-table td:nth-child(4),
-.services-table td:nth-child(5) {
+.TransportService-table td:nth-child(2),
+.TransportService-table td:nth-child(3),
+.TransportService-table td:nth-child(4),
+.TransportService-table td:nth-child(5) {
     width: 120px;
     min-width: 120px;
 }
 
-.services-table td:nth-child(6),
-.services-table td:nth-child(7) {
+.TransportService-table td:nth-child(6),
+.TransportService-table td:nth-child(7) {
     width: 150px;
     min-width: 150px;
 }
 
-.services-table td:last-child {
+.TransportService-table td:last-child {
     text-align: center;
     width: 100px;
     min-width: 100px;
@@ -1045,7 +1045,7 @@ body {
 }
 
 /* Сообщение об отсутствии услуг */
-.no-services {
+.no-TransportService {
     text-align: center;
     padding: 3rem;
     background-color: var(--card-bg);
@@ -1053,13 +1053,13 @@ body {
     box-shadow: 0 2px 8px rgba(0,0,0,0.1);
 }
 
-.no-services h2 {
+.no-TransportService h2 {
     font-size: 1.5rem;
     color: var(--text-primary);
     margin-bottom: 1rem;
 }
 
-.no-services p {
+.no-TransportService p {
     color: var(--text-secondary);
     margin-bottom: 2rem;
     font-size: 1.1rem;
@@ -1075,7 +1075,7 @@ body {
         padding: 1rem;
     }
     
-    .services-grid {
+    .TransportService-grid {
         grid-template-columns: 1fr;
     }
     
@@ -1133,7 +1133,7 @@ body {
         grid-template-columns: 1fr;
     }
     
-    .no-services {
+    .no-TransportService {
         padding: 2rem 1rem;
     }
     
@@ -1142,11 +1142,11 @@ body {
         margin-bottom: 1rem;
     }
     
-    .services-table-container {
+    .TransportService-table-container {
         overflow-x: auto;
     }
     
-    .services-table {
+    .TransportService-table {
         min-width: 600px;
     }
     

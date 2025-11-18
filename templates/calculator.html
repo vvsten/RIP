@@ -42,8 +42,8 @@
                     </div>
 
                     <!-- Таблица услуг -->
-                    <div class="services-table-container">
-                        <table class="services-table">
+                    <div class="TransportService-table-container">
+                        <table class="TransportService-table">
                             <thead>
                                 <tr>
                                     <th>Тип</th>
@@ -109,10 +109,10 @@
                         <button type="button" class="submit-btn" onclick="submitOrder()">Оформить заявку</button>
                     </div>
                 {{ else }}
-                    <div class="no-services">
+                    <div class="no-TransportService">
                         <h2>Нет выбранных услуг</h2>
                         <p>Добавьте услуги на главной странице, чтобы рассчитать стоимость доставки</p>
-                        <a href="/" class="add-services-link">Добавить услуги</a>
+                        <a href="/" class="add-TransportService-link">Добавить услуги</a>
                     </div>
                 {{ end }}
             </div>
@@ -149,7 +149,7 @@
                     updateCartCount(data.count);
                     
                     // Очищаем всю таблицу услуг
-                    const cartTable = document.querySelector('.services-table tbody');
+                    const cartTable = document.querySelector('.TransportService-table tbody');
                     if (cartTable) {
                         cartTable.innerHTML = '';
                     }
@@ -375,7 +375,7 @@
                 headers: {
                     'Content-Type': 'application/json',
                 },
-                body: JSON.stringify({ services: orderData })
+                body: JSON.stringify({ TransportService: orderData })
             })
             .then(response => response.json())
             .then(data => {

@@ -70,10 +70,10 @@
             </div>
         </div>
 
-        <div class="order-services">
-            <h2 class="order-services-title">Услуги в заявке</h2>
+        <div class="order-TransportService">
+            <h2 class="order-TransportService-title">Услуги в заявке</h2>
             
-            {{ range $index, $service := .services }}
+            {{ range $index, $service := .TransportService }}
             <div class="order-service-item">
                 <img src="{{ $service.ImageURL }}" alt="{{ $service.Name }}" class="order-service-image" onerror="this.src='data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iODAiIGhlaWdodD0iODAiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PHJlY3Qgd2lkdGg9IjEwMCUiIGhlaWdodD0iMTAwJSIgZmlsbD0iI2Y4ZjlmYSIvPjx0ZXh0IHg9IjUwJSIgeT0iNTAlIiBmb250LWZhbWlseT0iQXJpYWwiIGZvbnQtc2l6ZT0iMTIiIGZpbGw9IiM2Yzc1N2QiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGR5PSIuM2VtIj5ObyBJbWFnZTwvdGV4dD48L3N2Zz4='">
                 <div class="order-service-info">

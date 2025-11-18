@@ -127,8 +127,8 @@ function buildQueryString(filters: ServiceFilters): string {
  * Имитирует серверную фильтрацию на mock данных
  * Используется когда бэкенд недоступен
  */
-function filterMockServices(services: Service[], filters: ServiceFilters): Service[] {
-  return services.filter(service => {
+function filterMockServices(TransportService: Service[], filters: ServiceFilters): Service[] {
+  return TransportService.filter(service => {
     // Поиск по названию и описанию
     if (filters.search) {
       const searchLower = filters.search.toLowerCase();
@@ -165,14 +165,14 @@ function filterMockServices(services: Service[], filters: ServiceFilters): Servi
  * @returns Promise с массивом услуг
  * 
  * Логика работы:
- * 1. Делает fetch запрос к бэкенду через proxy (/api/services)
+ * 1. Делает fetch запрос к бэкенду через proxy (/api/TransportService)
  * 2. Если сервер недоступен → возвращает mock данные
  * 3. Если сервер доступен → серверная фильтрация, иначе локальная на mock
  */
 export async function fetchServices(filters: ServiceFilters = {}): Promise<Service[]> {
   try {
     const queryString = buildQueryString(filters);
-    const response = await fetch(`/api/services${queryString}`);
+    const response = await fetch(`/api/TransportService${queryString}`);
     
     if (!response.ok) {
       throw new Error(`HTTP error! status: ${response.status}`);
@@ -180,20 +180,20 @@ export async function fetchServices(filters: ServiceFilters = {}): Promise<Servi
     
     const data = await response.json();
     
-    // Если ответ содержит поле services, берем его
-    let services: ServiceRaw[] = [];
-    if (data.services && Array.isArray(data.services)) {
-      services = data.services;
+    // Если ответ содержит поле TransportService, берем его
+    let TransportService: ServiceRaw[] = [];
+    if (data.TransportService && Array.isArray(data.TransportService)) {
+      TransportService = data.TransportService;
     } else if (Array.isArray(data)) {
-      services = data;
+      TransportService = data;
     } else {
       throw new Error('Unexpected response format');
     }
     
     // Конвертируем из snake_case в camelCase
-    return services.map(convertService);
+    return TransportService.map(convertService);
   } catch (error) {
-    console.warn('Failed to fetch services from backend, using mock data:', error);
+    console.warn('Failed to fetch TransportService from backend, using mock data:', error);
     
     // Fallback на mock данные при недоступности сервера
     // Применяем локальную фильтрацию если сервер не ответил
@@ -206,7 +206,7 @@ export async function fetchServices(filters: ServiceFilters = {}): Promise<Servi
  */
 export async function fetchService(id: number): Promise<Service | null> {
   try {
-    const response = await fetch(`/api/services/${id}`);
+    const response = await fetch(`/api/TransportService/${id}`);
     
     if (!response.ok) {
       throw new Error(`HTTP error! status: ${response.status}`);

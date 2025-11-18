@@ -71,7 +71,7 @@ info:
   title: RIP Go API
   version: "1.0"
 paths:
-  /api/orders:
+  /api/LogisticRequest:
     get:
       consumes:
       - application/json
@@ -114,7 +114,7 @@ paths:
       summary: Get logistic requests list
       tags:
       - logistic-requests
-  /api/orders/{id}/complete:
+  /api/LogisticRequest/{id}/complete:
     put:
       consumes:
       - application/json
@@ -171,7 +171,7 @@ paths:
       - application/json
       description: Submit a new cargo transportation logistic request
       parameters:
-      - description: Logistic request data with services
+      - description: Logistic request data with TransportService
         in: body
         name: request
         required: true

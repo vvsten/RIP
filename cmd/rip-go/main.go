@@ -121,11 +121,11 @@ func registerRoutes(r *gin.Engine, handler *handler.Handler) {
 	r.PUT("/api/order/:id/status", handler.UpdateOrderStatus) // Обновление статуса заказа
 
     // CRUD JSON для услуг
-    r.GET("/api/services", handler.GetAllServicesJSON)     // Список всех услуг с фильтрацией
-    r.GET("/api/services/:id", handler.GetServiceJSON)
-    r.POST("/api/services", handler.CreateService)
-    r.PUT("/api/services/:id", handler.UpdateService)
-    r.DELETE("/api/services/:id", handler.DeleteService)
+    r.GET("/api/TransportService", handler.GetAllServicesJSON)     // Список всех услуг с фильтрацией
+    r.GET("/api/TransportService/:id", handler.GetServiceJSON)
+    r.POST("/api/TransportService", handler.CreateService)
+    r.PUT("/api/TransportService/:id", handler.UpdateService)
+    r.DELETE("/api/TransportService/:id", handler.DeleteService)
 
     // Авторизация
     r.POST("/sign_up", handler.RegisterUser)
@@ -142,20 +142,20 @@ func registerRoutes(r *gin.Engine, handler *handler.Handler) {
     }
 
     // Заявки (требуют авторизации)
-    ordersGroup := r.Group("/api/orders")
-    ordersGroup.Use(handler.AuthMiddleware.RequireAuth())
+    LogisticRequestGroup := r.Group("/api/LogisticRequest")
+    LogisticRequestGroup.Use(handler.AuthMiddleware.RequireAuth())
     {
-        ordersGroup.GET("", handler.GetOrders)
-        ordersGroup.GET("/:id", handler.GetOrder)
-        ordersGroup.DELETE("/:id", handler.DeleteOrder)
+        LogisticRequestGroup.GET("", handler.GetOrders)
+        LogisticRequestGroup.GET("/:id", handler.GetOrder)
+        LogisticRequestGroup.DELETE("/:id", handler.DeleteOrder)
     }
     
     // Специфичные маршруты с дополнительными сегментами
-    r.PUT("/api/orders/:id/form", handler.AuthMiddleware.RequireAuth(), handler.FormOrder)
-    r.PUT("/api/orders/:id/update", handler.AuthMiddleware.RequireAuth(), handler.UpdateOrder)
+    r.PUT("/api/LogisticRequest/:id/form", handler.AuthMiddleware.RequireAuth(), handler.FormOrder)
+    r.PUT("/api/LogisticRequest/:id/update", handler.AuthMiddleware.RequireAuth(), handler.UpdateOrder)
     
     // Маршрут модератора для завершения заявки
-    moderatorCompleteGroup := r.Group("/api/orders/:id")
+    moderatorCompleteGroup := r.Group("/api/LogisticRequest/:id")
     moderatorCompleteGroup.Use(handler.AuthMiddleware.RequireModerator())
     {
         moderatorCompleteGroup.PUT("/complete", handler.CompleteOrder)
@@ -170,8 +170,8 @@ func registerRoutes(r *gin.Engine, handler *handler.Handler) {
         logisticGroup.DELETE("/:id", handler.DeleteOrder)
         logisticGroup.PUT("/:id/form", handler.FormOrder)
         logisticGroup.PUT("/:id/update", handler.UpdateOrder)
-        logisticGroup.DELETE("/:id/services/:service_id", handler.RemoveServiceFromOrder)
-        logisticGroup.PUT("/:id/services/:service_id", handler.UpdateOrderService)
+        logisticGroup.DELETE("/:id/TransportService/:service_id", handler.RemoveServiceFromOrder)
+        logisticGroup.PUT("/:id/TransportService/:service_id", handler.UpdateOrderService)
     }
     // Завершение логистической заявки (модератор)
     moderatorLR := r.Group("/api/logistic-requests/:id")
@@ -190,8 +190,8 @@ func registerRoutes(r *gin.Engine, handler *handler.Handler) {
     r.GET("/api/cart/icon", handler.GetCartIcon)
 
     // М-М заявка-услуга
-    r.DELETE("/api/orders/:id/services/:service_id", handler.RemoveServiceFromOrder)
-    r.PUT("/api/orders/:id/services/:service_id", handler.UpdateOrderService)
+    r.DELETE("/api/LogisticRequest/:id/TransportService/:service_id", handler.RemoveServiceFromOrder)
+    r.PUT("/api/LogisticRequest/:id/TransportService/:service_id", handler.UpdateOrderService)
 
     // Swagger документация
     r.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
