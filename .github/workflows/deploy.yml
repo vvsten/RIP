@@ -41,7 +41,7 @@ jobs:
       - name: Prepare dist for GitHub Pages
         run: |
           # Создаем .nojekyll файл (обязательно для SPA на GitHub Pages)
-          touch frontend/dist/.nojekyll
+          echo "" > frontend/dist/.nojekyll
           # Удаляем CNAME если он есть (может мешать GitHub Pages)
           rm -f frontend/dist/CNAME
           # Проверяем, что index.html существует
@@ -49,6 +49,9 @@ jobs:
             echo "ERROR: index.html not found in dist!"
             exit 1
           fi
+          # Показываем содержимое dist для отладки
+          echo "Contents of dist:"
+          ls -la frontend/dist/ | head -20
           echo "✓ .nojekyll created"
           echo "✓ CNAME removed (if existed)"
           echo "✓ index.html found"
@@ -60,4 +63,6 @@ jobs:
           publish_dir: ./frontend/dist
           cname: false
           remove_old_files: true
+          # Принудительно удаляем CNAME из gh-pages
+          force_orphan: false
 
