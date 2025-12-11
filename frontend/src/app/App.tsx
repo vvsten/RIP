@@ -2,6 +2,7 @@ import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import { Provider } from 'react-redux';
 import { store } from '../shared/store/store';
 import { Navbar } from '../widgets/Navbar/Navbar';
+import { CalculatorShortcut } from '../widgets/Cart/CalculatorShortcut';
 import { Breadcrumbs } from '../widgets/Breadcrumbs/Breadcrumbs';
 import { ServerConfig } from '../widgets/ServerConfig/ServerConfig';
 import { Home } from '../pages/Home/Home';
@@ -27,13 +28,16 @@ export function App() {
       {/* Навигационная панель - всегда вверху */}
       <Navbar />
       
+      {/* Иконка калькулятора под хедером */}
+      <CalculatorShortcut />
+      
       {/* Навигационная цепочка - отображается на нужных страницах */}
       <Breadcrumbs />
       
-      {/* Маршруты для трех страниц */}
+      {/* Маршруты для страниц */}
       <Routes>
         <Route path="/" element={<Home />} />
-        <Route path="/services" element={<Services />} />
+        <Route path="/transport-services" element={<Services />} />
         <Route path="/about" element={<About />} />
       </Routes>
     </BrowserRouter>

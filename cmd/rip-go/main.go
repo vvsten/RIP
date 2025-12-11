@@ -150,21 +150,27 @@ func main() {
 	// Игнорируем запросы к фронтенд маршрутам, которые должны обрабатываться React Router
 	r.NoRoute(func(c *gin.Context) {
 		path := c.Request.URL.Path
-		// Если это запрос к фронтенд маршруту (не API и не статика), возвращаем 404
-		if !strings.HasPrefix(path, "/api") && 
-		   !strings.HasPrefix(path, "/static") && 
-		   !strings.HasPrefix(path, "/lab1") &&
-		   path != "/" && 
-		   path != "/service" && 
-		   path != "/order" && 
-		   path != "/calculator" {
+		// Если это API, статика, swagger или известные бэкенд роуты - возвращаем 404
+		if strings.HasPrefix(path, "/api") || 
+		   strings.HasPrefix(path, "/static") || 
+		   strings.HasPrefix(path, "/lab1") ||
+		   strings.HasPrefix(path, "/swagger") ||
+		   path == "/service" || 
+		   path == "/order" || 
+		   path == "/calculator" ||
+		   strings.HasPrefix(path, "/service/") {
 			c.JSON(http.StatusNotFound, gin.H{
 				"error": "Route not found",
-				"message": "This route should be handled by the frontend SPA",
+				"message": "This route should be handled",
 			})
 			return
 		}
-		c.JSON(http.StatusNotFound, gin.H{"error": "Not found"})
+		
+		// Для фронтенд роутов (/, /transport-services, /about) - не возвращаем ошибку
+		// React Router обработает их на клиенте
+		// Просто возвращаем пустой ответ, чтобы не мешать SPA роутингу
+		c.Status(http.StatusOK)
+		c.Writer.WriteHeaderNow()
 	})
 
 	// Запускаем сервер
