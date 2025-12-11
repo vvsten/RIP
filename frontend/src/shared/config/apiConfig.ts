@@ -23,6 +23,13 @@ const getServerIP = (): string => {
     // Для Tauri используем IP из localStorage или переменной окружения
     const savedIP = localStorage.getItem('api_server_ip');
     if (savedIP) {
+      // Автоматически исправляем HTTPS на HTTP (для разработки)
+      if (savedIP.startsWith('https://')) {
+        const correctedIP = savedIP.replace('https://', 'http://');
+        localStorage.setItem('api_server_ip', correctedIP);
+        console.log(`[Config] Auto-corrected HTTPS to HTTP: ${savedIP} -> ${correctedIP}`);
+        return correctedIP;
+      }
       return savedIP;
     }
     // По умолчанию для Tauri используем localhost (пользователь должен настроить)
