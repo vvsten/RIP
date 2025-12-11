@@ -25,7 +25,7 @@ type DeliveryResult struct {
 }
 
 // CalculateDelivery - основной метод расчета доставки
-func (dc *DeliveryCalculator) CalculateDelivery(service ds.Service, fromCity, toCity string, length, width, height, weight float64) DeliveryResult {
+func (dc *DeliveryCalculator) CalculateDelivery(service ds.TransportService, fromCity, toCity string, length, width, height, weight float64) DeliveryResult {
 	result := DeliveryResult{
 		IsValid: true,
 	}
@@ -53,7 +53,7 @@ func (dc *DeliveryCalculator) CalculateDelivery(service ds.Service, fromCity, to
 }
 
 // validateConstraints - проверка ограничений
-func (dc *DeliveryCalculator) validateConstraints(service ds.Service, length, width, height, weight float64) bool {
+func (dc *DeliveryCalculator) validateConstraints(service ds.TransportService, length, width, height, weight float64) bool {
 	volume := length * width * height
 	
 	// Проверяем вес
@@ -103,7 +103,7 @@ func (dc *DeliveryCalculator) getMaxDimensions(serviceID int) MaxDimensions {
 }
 
 // calculateDeliveryDays - расчет сроков доставки
-func (dc *DeliveryCalculator) calculateDeliveryDays(service ds.Service, distance, volume, weight float64) int {
+func (dc *DeliveryCalculator) calculateDeliveryDays(service ds.TransportService, distance, volume, weight float64) int {
 	// Базовые сроки
 	baseDays := service.DeliveryDays
 	
@@ -199,7 +199,7 @@ func (dc *DeliveryCalculator) getMinDeliveryDays(serviceID int) int {
 }
 
 // calculateCost - расчет стоимости доставки
-func (dc *DeliveryCalculator) calculateCost(service ds.Service, distance, volume, weight float64) float64 {
+func (dc *DeliveryCalculator) calculateCost(service ds.TransportService, distance, volume, weight float64) float64 {
 	// Базовая стоимость
 	baseCost := service.Price
 	

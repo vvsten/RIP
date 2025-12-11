@@ -3,8 +3,8 @@ import { useAppSelector, useAppDispatch } from '../../shared/store/hooks';
 import { setFilters } from '../../shared/store/slices/filtersSlice';
 import { Filters } from '../../widgets/Filters/Filters';
 import { ServiceCard } from '../../widgets/ServiceCard/ServiceCard';
-import { fetchServices } from '../../shared/api/servicesApi';
-import type { Service, ServiceFilters } from '../../shared/types/Service';
+import { fetchTransportServices } from '../../shared/api/servicesApi';
+import type { TransportService, TransportServiceFilters } from '../../shared/types/TransportService';
 
 /**
  * Страница списка услуг с фильтрацией
@@ -25,7 +25,7 @@ export function Services() {
   const dispatch = useAppDispatch();
   
   // useState для списка услуг
-  const [services, setServices] = useState<Service[]>([]);
+  const [services, setServices] = useState<TransportService[]>([]);
   
   // useState для состояния загрузки
   const [loading, setLoading] = useState(true);
@@ -44,14 +44,14 @@ export function Services() {
    * Загрузка услуг с сервера
    * @param filters - опциональные параметры фильтрации
    */
-  const loadServices = async (filtersToApply: ServiceFilters = {}) => {
+  const loadServices = async (filtersToApply: TransportServiceFilters = {}) => {
     setLoading(true);
     setError(null);
     
     try {
       // Вызываем fetchServices из servicesApi
       // Функция автоматически обрабатывает fallback на mock
-      const data = await fetchServices(filtersToApply);
+      const data = await fetchTransportServices(filtersToApply);
       setServices(data);
     } catch (err) {
       setError('Не удалось загрузить услуги');
@@ -67,7 +67,7 @@ export function Services() {
    * Сохраняет фильтры в Redux store
    * @param newFilters - новые параметры фильтрации
    */
-  const handleFilterChange = (newFilters: ServiceFilters) => {
+  const handleFilterChange = (newFilters: TransportServiceFilters) => {
     dispatch(setFilters(newFilters));
   };
   

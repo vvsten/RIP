@@ -1,21 +1,21 @@
 package ds
 
-// Cart — представление корзины через заказ-черновик (orders)
+// Cart — представление корзины через логистическую заявку-черновик
 type Cart struct {
-    ID        int          `json:"id" gorm:"primaryKey"`    // это id заказа в таблице orders
+    ID        int          `json:"id" gorm:"primaryKey"`    // это id заявки в таблице logistic_requests
     SessionID string       `json:"session_id"`
     IsDraft   bool         `json:"is_draft" gorm:"not null;default:true"`
-    Services  []CartService `json:"services" gorm:"foreignKey:OrderID"`
+    Services  []CartService `json:"services" gorm:"foreignKey:LogisticRequestID"`
 }
 
-func (Cart) TableName() string { return "orders" }
+func (Cart) TableName() string { return "logistic_requests" }
 
-// CartService — строка корзины хранится в order_services
+// CartService — строка корзины хранится в logistic_request_services
 type CartService struct {
-    ID        int `json:"id" gorm:"primaryKey"`
-    OrderID   int `json:"order_id" gorm:"not null"`
-    ServiceID int `json:"service_id" gorm:"not null"`
-    Quantity  int `json:"quantity" gorm:"not null"`
+    ID                 int `json:"id" gorm:"primaryKey"`
+    LogisticRequestID  int `json:"logistic_request_id" gorm:"not null"`
+    TransportServiceID int `json:"transport_service_id" gorm:"not null"`
+    Quantity           int `json:"quantity" gorm:"not null"`
 }
 
-func (CartService) TableName() string { return "order_services" }
+func (CartService) TableName() string { return "logistic_request_services" }

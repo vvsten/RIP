@@ -12,6 +12,7 @@ package main
 import (
 	"crypto/tls"
 	"fmt"
+	"io"
 	"net/http"
 	"time"
 
@@ -99,6 +100,48 @@ func main() {
 	r.LoadHTMLGlob("templates/*.html")
 	r.Static("/static", "static")
 
+	// Прокси для MinIO изображений
+	r.Any("/lab1/*path", func(c *gin.Context) {
+		path := c.Param("path")
+		minioURL := fmt.Sprintf("http://localhost:9003/lab1%s", path)
+		
+		// Создаем запрос к MinIO
+		req, err := http.NewRequest(c.Request.Method, minioURL, c.Request.Body)
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to create request"})
+			return
+		}
+		
+		// Копируем заголовки
+		for key, values := range c.Request.Header {
+			for _, value := range values {
+				req.Header.Add(key, value)
+			}
+		}
+		
+		// Выполняем запрос
+		client := &http.Client{Timeout: 30 * time.Second}
+		resp, err := client.Do(req)
+		if err != nil {
+			c.JSON(http.StatusBadGateway, gin.H{"error": "Failed to connect to MinIO"})
+			return
+		}
+		defer resp.Body.Close()
+		
+		// Копируем заголовки ответа
+		for key, values := range resp.Header {
+			for _, value := range values {
+				c.Header(key, value)
+			}
+		}
+		
+		// Устанавливаем статус код
+		c.Status(resp.StatusCode)
+		
+		// Копируем тело ответа
+		io.Copy(c.Writer, resp.Body)
+	})
+
 	// Регистрируем маршруты
 	registerRoutes(r, handler)
 
@@ -134,7 +177,7 @@ func registerRoutes(r *gin.Engine, handler *handler.Handler) {
 	// Маршруты для четырех страниц
 	r.GET("/", handler.GetServices)                    // Главная страница со списком услуг
 	r.GET("/service/:id", handler.GetService)          // Страница с подробной информацией об услуге
-	r.GET("/order", handler.GetOrderDetails)           // Страница с деталями заявки
+	r.GET("/order", handler.GetLogisticRequestDetails)           // Страница с деталями заявки
 	r.GET("/calculator", handler.GetCalculator)        // Страница калькулятора
 	r.POST("/calculator", handler.PostCalculator)      // Обработка формы калькулятора
 
@@ -148,10 +191,10 @@ func registerRoutes(r *gin.Engine, handler *handler.Handler) {
 	// API маршруты для калькулятора (переименованы под грузоперевозки)
 	r.POST("/api/searchtrans", handler.SearchTransport) // Поиск транспорта
 	r.POST("/api/calculatecargo", handler.CalculateService) // Расчет стоимости грузоперевозки
-	r.POST("/api/submitcargoorder", handler.AuthMiddleware.RequireAuth(), handler.SubmitOrder) // Отправка заявки на грузоперевозку
+	r.POST("/api/submitcargoorder", handler.AuthMiddleware.RequireAuth(), handler.SubmitLogisticRequest) // Отправка заявки на грузоперевозку
 
 	// API маршрут для обновления статуса заказа через курсор
-	r.PUT("/api/order/:id/status", handler.UpdateOrderStatus) // Обновление статуса заказа
+	r.PUT("/api/order/:id/status", handler.UpdateLogisticRequestStatus) // Обновление статуса заказа
 
     // CRUD JSON для услуг
     r.GET("/api/services", handler.GetAllServicesJSON)     // Список всех услуг с фильтрацией
@@ -159,6 +202,13 @@ func registerRoutes(r *gin.Engine, handler *handler.Handler) {
     r.POST("/api/services", handler.CreateService)
     r.PUT("/api/services/:id", handler.UpdateService)
     r.DELETE("/api/services/:id", handler.DeleteService)
+    
+    // Алиасы для transport-services (для совместимости с фронтендом)
+    r.GET("/api/transport-services", handler.GetAllServicesJSON)
+    r.GET("/api/transport-services/:id", handler.GetServiceJSON)
+    r.POST("/api/transport-services", handler.CreateService)
+    r.PUT("/api/transport-services/:id", handler.UpdateService)
+    r.DELETE("/api/transport-services/:id", handler.DeleteService)
 
     // Авторизация
     r.POST("/sign_up", handler.RegisterUser)
@@ -178,53 +228,53 @@ func registerRoutes(r *gin.Engine, handler *handler.Handler) {
     ordersGroup := r.Group("/api/orders")
     ordersGroup.Use(handler.AuthMiddleware.RequireAuth())
     {
-        ordersGroup.GET("", handler.GetOrders)
-        ordersGroup.GET("/:id", handler.GetOrder)
-        ordersGroup.DELETE("/:id", handler.DeleteOrder)
+        ordersGroup.GET("", handler.GetLogisticRequests)
+        ordersGroup.GET("/:id", handler.GetLogisticRequest)
+        ordersGroup.DELETE("/:id", handler.DeleteLogisticRequest)
     }
     
     // Специфичные маршруты с дополнительными сегментами
-    r.PUT("/api/orders/:id/form", handler.AuthMiddleware.RequireAuth(), handler.FormOrder)
-    r.PUT("/api/orders/:id/update", handler.AuthMiddleware.RequireAuth(), handler.UpdateOrder)
+    r.PUT("/api/orders/:id/form", handler.AuthMiddleware.RequireAuth(), handler.FormLogisticRequest)
+    r.PUT("/api/orders/:id/update", handler.AuthMiddleware.RequireAuth(), handler.UpdateLogisticRequest)
     
     // Маршрут модератора для завершения заявки
     moderatorCompleteGroup := r.Group("/api/orders/:id")
     moderatorCompleteGroup.Use(handler.AuthMiddleware.RequireModerator())
     {
-        moderatorCompleteGroup.PUT("/complete", handler.CompleteOrder)
+        moderatorCompleteGroup.PUT("/complete", handler.CompleteLogisticRequest)
     }
 
     // Новые маршруты: логистические заявки (основные), алиасы для совместимости
     logisticGroup := r.Group("/api/logistic-requests")
     logisticGroup.Use(handler.AuthMiddleware.RequireAuth())
     {
-        logisticGroup.GET("", handler.GetOrders)
-        logisticGroup.GET("/:id", handler.GetOrder)
-        logisticGroup.DELETE("/:id", handler.DeleteOrder)
-        logisticGroup.PUT("/:id/form", handler.FormOrder)
-        logisticGroup.PUT("/:id/update", handler.UpdateOrder)
-        logisticGroup.DELETE("/:id/services/:service_id", handler.RemoveServiceFromOrder)
-        logisticGroup.PUT("/:id/services/:service_id", handler.UpdateOrderService)
+        logisticGroup.GET("", handler.GetLogisticRequests)
+        logisticGroup.GET("/:id", handler.GetLogisticRequest)
+        logisticGroup.DELETE("/:id", handler.DeleteLogisticRequest)
+        logisticGroup.PUT("/:id/form", handler.FormLogisticRequest)
+        logisticGroup.PUT("/:id/update", handler.UpdateLogisticRequest)
+        logisticGroup.DELETE("/:id/services/:service_id", handler.RemoveServiceFromLogisticRequest)
+        logisticGroup.PUT("/:id/services/:service_id", handler.UpdateLogisticRequestService)
     }
     // Завершение логистической заявки (модератор)
     moderatorLR := r.Group("/api/logistic-requests/:id")
     moderatorLR.Use(handler.AuthMiddleware.RequireModerator())
     {
-        moderatorLR.PUT("/complete", handler.CompleteOrder)
+        moderatorLR.PUT("/complete", handler.CompleteLogisticRequest)
     }
 
     // Алиас статуса для логистических заявок
-    r.PUT("/api/logistic-requests/:id/status", handler.UpdateOrderStatus)
+    r.PUT("/api/logistic-requests/:id/status", handler.UpdateLogisticRequestStatus)
 
     // Эндпоинт оформления логистической заявки (новый алиас)
-    r.POST("/api/submit-cargo-logistic-request", handler.AuthMiddleware.RequireAuth(), handler.SubmitOrder)
+    r.POST("/api/submit-cargo-logistic-request", handler.AuthMiddleware.RequireAuth(), handler.SubmitLogisticRequest)
 
     // Иконка корзины доступна без авторизации (для фронта)
     r.GET("/api/cart/icon", handler.GetCartIcon)
 
     // М-М заявка-услуга
-    r.DELETE("/api/orders/:id/services/:service_id", handler.RemoveServiceFromOrder)
-    r.PUT("/api/orders/:id/services/:service_id", handler.UpdateOrderService)
+    r.DELETE("/api/orders/:id/services/:service_id", handler.RemoveServiceFromLogisticRequest)
+    r.PUT("/api/orders/:id/services/:service_id", handler.UpdateLogisticRequestService)
 
     // Swagger документация
     r.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))

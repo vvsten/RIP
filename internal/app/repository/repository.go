@@ -7,6 +7,7 @@ import (
     "time"
 
     "github.com/google/uuid"
+    "github.com/sirupsen/logrus"
     "gorm.io/driver/postgres"
     "gorm.io/gorm"
     "rip-go-app/internal/app/ds"
@@ -30,8 +31,8 @@ func New(dsn string) (*Repository, error) {
 }
 
 // GetServices - получение всех услуг с возможностью фильтрации (исключая удалённые)
-func (r *Repository) GetServices(search string) ([]ds.Service, error) {
-	var services []ds.Service
+func (r *Repository) GetServices(search string) ([]ds.TransportService, error) {
+	var services []ds.TransportService
 	
 	query := r.db.Where("deleted_at IS NULL")
 	
@@ -50,8 +51,8 @@ func (r *Repository) GetServices(search string) ([]ds.Service, error) {
 }
 
 // GetServicesWithFilters - получение услуг с расширенными фильтрами для API
-func (r *Repository) GetServicesWithFilters(search string, minPrice, maxPrice *float64, dateFrom, dateTo *time.Time) ([]ds.Service, error) {
-	var services []ds.Service
+func (r *Repository) GetServicesWithFilters(search string, minPrice, maxPrice *float64, dateFrom, dateTo *time.Time) ([]ds.TransportService, error) {
+	var services []ds.TransportService
 	
 	query := r.db.Where("deleted_at IS NULL")
 	
@@ -91,17 +92,17 @@ func (r *Repository) GetServicesWithFilters(search string, minPrice, maxPrice *f
 }
 
 // GetService - получение услуги по ID
-func (r *Repository) GetService(id int) (ds.Service, error) {
-	var service ds.Service
+func (r *Repository) GetService(id int) (ds.TransportService, error) {
+	var service ds.TransportService
 	err := r.db.Where("id = ?", id).First(&service).Error
 	if err != nil {
-		return ds.Service{}, fmt.Errorf("услуга не найдена")
+		return ds.TransportService{}, fmt.Errorf("услуга не найдена")
 	}
 	return service, nil
 }
 
 // GetServiceByType - получение услуги по типу доставки
-func (r *Repository) GetServiceByType(deliveryType string) (ds.Service, error) {
+func (r *Repository) GetServiceByType(deliveryType string) (ds.TransportService, error) {
 	typeMap := map[string]int{
 		"fura":           1,
 		"malotonnazhnyi": 2,
@@ -115,25 +116,25 @@ func (r *Repository) GetServiceByType(deliveryType string) (ds.Service, error) {
 		return r.GetService(id)
 	}
 	
-	return ds.Service{}, fmt.Errorf("тип доставки не найден")
+	return ds.TransportService{}, fmt.Errorf("тип доставки не найден")
 }
 
 // CRUD для Service
-func (r *Repository) CreateService(s *ds.Service) error {
+func (r *Repository) CreateService(s *ds.TransportService) error {
     return r.db.Create(s).Error
 }
 
-func (r *Repository) UpdateService(s *ds.Service) error {
+func (r *Repository) UpdateService(s *ds.TransportService) error {
     return r.db.Save(s).Error
 }
 
 func (r *Repository) DeleteService(id int) error {
-    return r.db.Delete(&ds.Service{}, id).Error
+    return r.db.Delete(&ds.TransportService{}, id).Error
 }
 
-// CreateCargoOrder создаёт заказ на основе перечня транспортов и параметров груза
-type CargoOrderItem struct {
-    ServiceID int
+// CreateCargoLogisticRequest создаёт заказ на основе перечня транспортов и параметров груза
+type CargoLogisticRequestItem struct {
+    TransportServiceID int
     FromCity  string
     ToCity    string
     Length    float64
@@ -142,15 +143,15 @@ type CargoOrderItem struct {
     Weight    float64
 }
 
-func (r *Repository) CreateCargoOrder(items []CargoOrderItem, creatorID int) (int, error) {
+func (r *Repository) CreateCargoLogisticRequest(items []CargoLogisticRequestItem, creatorID int) (int, error) {
     if len(items) == 0 {
         return 0, fmt.Errorf("no items provided")
     }
 
-    return r.createCargoOrderTx(items, creatorID)
+    return r.createCargoLogisticRequestTx(items, creatorID)
 }
 
-func (r *Repository) createCargoOrderTx(items []CargoOrderItem, creatorID int) (int, error) {
+func (r *Repository) createCargoLogisticRequestTx(items []CargoLogisticRequestItem, creatorID int) (int, error) {
     calc := calculator.NewDeliveryCalculator()
 
     returnID := 0
@@ -158,7 +159,7 @@ func (r *Repository) createCargoOrderTx(items []CargoOrderItem, creatorID int) (
         // Используем параметры первого как общие
         first := items[0]
 
-        order := ds.Order{
+        order := ds.LogisticRequest{
             SessionID: "guest",
             IsDraft:   true,
             FromCity:  first.FromCity,
@@ -185,9 +186,9 @@ func (r *Repository) createCargoOrderTx(items []CargoOrderItem, creatorID int) (
         totalHeight := 0.0
 
         for _, it := range items {
-            svc, err := r.GetService(it.ServiceID)
+            svc, err := r.GetService(it.TransportServiceID)
             if err != nil {
-                return fmt.Errorf("service %d not found", it.ServiceID)
+                return fmt.Errorf("service %d not found", it.TransportServiceID)
             }
             res := calc.CalculateDelivery(svc, it.FromCity, it.ToCity, it.Length, it.Width, it.Height, it.Weight)
             if !res.IsValid {
@@ -195,7 +196,7 @@ func (r *Repository) createCargoOrderTx(items []CargoOrderItem, creatorID int) (
             }
 
             // создаём строку заказа
-            os := ds.OrderService{OrderID: order.ID, ServiceID: it.ServiceID, Quantity: 1}
+            os := ds.LogisticRequestService{LogisticRequestID: order.ID, TransportServiceID: it.TransportServiceID, Quantity: 1}
             if err := tx.Create(&os).Error; err != nil {
                 return err
             }
@@ -278,9 +279,9 @@ func (r *Repository) UpdateUser(user *ds.User) error {
 
 // ==================== ЗАЯВКИ ====================
 
-// GetOrders - получение списка заявок с фильтрацией (исключая удалённые и черновики)
-func (r *Repository) GetOrders(status string, dateFrom, dateTo *time.Time) ([]ds.Order, error) {
-    var orders []ds.Order
+// GetLogisticRequests - получение списка заявок с фильтрацией (исключая удалённые и черновики)
+func (r *Repository) GetLogisticRequests(status string, dateFrom, dateTo *time.Time) ([]ds.LogisticRequest, error) {
+    var orders []ds.LogisticRequest
     
     query := r.db.Preload("Creator").Preload("Moderator").
         Where("deleted_at IS NULL AND status != ?", ds.StatusDraft)
@@ -301,32 +302,32 @@ func (r *Repository) GetOrders(status string, dateFrom, dateTo *time.Time) ([]ds
     return orders, err
 }
 
-// GetOrder - получение заявки по ID с услугами
-func (r *Repository) GetOrder(id int) (ds.Order, error) {
-    var order ds.Order
-    err := r.db.Preload("Services.Service").Preload("Creator").Preload("Moderator").
+// GetLogisticRequest - получение заявки по ID с услугами
+func (r *Repository) GetLogisticRequest(id int) (ds.LogisticRequest, error) {
+    var order ds.LogisticRequest
+    err := r.db.Preload("Services.TransportService").Preload("Creator").Preload("Moderator").
         Where("id = ? AND deleted_at IS NULL", id).First(&order).Error
     if err != nil {
-        return ds.Order{}, fmt.Errorf("заявка не найдена")
+        return ds.LogisticRequest{}, fmt.Errorf("заявка не найдена")
     }
     return order, nil
 }
 
-// GetDraftOrder - получение черновика заявки пользователя
-func (r *Repository) GetDraftOrder(creatorID int) (ds.Order, error) {
-    var order ds.Order
-    err := r.db.Preload("Services.Service").
+// GetDraftLogisticRequest - получение черновика заявки пользователя
+func (r *Repository) GetDraftLogisticRequest(creatorID int) (ds.LogisticRequest, error) {
+    var order ds.LogisticRequest
+    err := r.db.Preload("Services.TransportService").
         Where("creator_id = ? AND status = ? AND deleted_at IS NULL", creatorID, ds.StatusDraft).
         First(&order).Error
     if err != nil {
-        return ds.Order{}, fmt.Errorf("черновик не найден")
+        return ds.LogisticRequest{}, fmt.Errorf("черновик не найден")
     }
     return order, nil
 }
 
-// CreateDraftOrder - создание черновика заявки
-func (r *Repository) CreateDraftOrder(creatorID int) (ds.Order, error) {
-    order := ds.Order{
+// CreateDraftLogisticRequest - создание черновика заявки
+func (r *Repository) CreateDraftLogisticRequest(creatorID int) (ds.LogisticRequest, error) {
+    order := ds.LogisticRequest{
         CreatorID: creatorID,
         Status:    ds.StatusDraft,
         IsDraft:   true,
@@ -335,14 +336,14 @@ func (r *Repository) CreateDraftOrder(creatorID int) (ds.Order, error) {
     return order, err
 }
 
-// UpdateOrder - обновление заявки
-func (r *Repository) UpdateOrder(order *ds.Order) error {
+// UpdateLogisticRequest - обновление заявки
+func (r *Repository) UpdateLogisticRequest(order *ds.LogisticRequest) error {
     return r.db.Save(order).Error
 }
 
-// FormOrder - формирование заявки создателем (проверка обязательных полей)
-func (r *Repository) FormOrder(orderID int, fromCity, toCity string, weight, length, width, height float64) error {
-    var order ds.Order
+// FormLogisticRequest - формирование заявки создателем (проверка обязательных полей)
+func (r *Repository) FormLogisticRequest(orderID int, fromCity, toCity string, weight, length, width, height float64) error {
+    var order ds.LogisticRequest
     err := r.db.Preload("Services").Where("id = ?", orderID).First(&order).Error
     if err != nil {
         return fmt.Errorf("заявка не найдена")
@@ -377,14 +378,14 @@ func (r *Repository) FormOrder(orderID int, fromCity, toCity string, weight, len
     return r.db.Save(&order).Error
 }
 
-// CompleteOrder - завершение/отклонение заявки модератором
-func (r *Repository) CompleteOrder(orderID int, status string, moderatorID int) error {
+// CompleteLogisticRequest - завершение/отклонение заявки модератором
+func (r *Repository) CompleteLogisticRequest(orderID int, status string, moderatorID int) error {
     if status != ds.StatusCompleted && status != ds.StatusRejected {
         return fmt.Errorf("неверный статус для завершения")
     }
     
-    var order ds.Order
-    err := r.db.Preload("Services.Service").Where("id = ?", orderID).First(&order).Error
+    var order ds.LogisticRequest
+    err := r.db.Preload("Services.TransportService").Where("id = ?", orderID).First(&order).Error
     if err != nil {
         return fmt.Errorf("заявка не найдена")
     }
@@ -400,7 +401,7 @@ func (r *Repository) CompleteOrder(orderID int, status string, moderatorID int) 
         maxDays := 0
         
         for _, orderService := range order.Services {
-            res := calc.CalculateDelivery(orderService.Service, order.FromCity, order.ToCity, 
+            res := calc.CalculateDelivery(orderService.TransportService, order.FromCity, order.ToCity, 
                 order.Length, order.Width, order.Height, order.Weight)
             if res.IsValid {
                 totalCost += res.TotalCost
@@ -422,21 +423,21 @@ func (r *Repository) CompleteOrder(orderID int, status string, moderatorID int) 
     return r.db.Save(&order).Error
 }
 
-// DeleteOrder - удаление заявки (мягкое удаление)
+// DeleteLogisticRequest - удаление заявки (мягкое удаление)
 
-func (r *Repository) DeleteOrder(orderID int) error {
-    // Каскадное удаление автоматически удалит связанные записи в order_services
-    return r.db.Where("id = ?", orderID).Delete(&ds.Order{}).Error
+func (r *Repository) DeleteLogisticRequest(orderID int) error {
+    // Каскадное удаление автоматически удалит связанные записи в logistic_request_services
+    return r.db.Where("id = ?", orderID).Delete(&ds.LogisticRequest{}).Error
 }
 
 // GetCartIcon - получение иконки корзины (количество услуг в черновике)
 func (r *Repository) GetCartIcon(creatorID int) (int, int, error) {
-    var order ds.Order
+    var order ds.LogisticRequest
     err := r.db.Preload("Services").Where("creator_id = ? AND status = ? AND deleted_at IS NULL", 
         creatorID, ds.StatusDraft).First(&order).Error
     if err != nil {
         // Создаём черновик если нет
-        order, err = r.CreateDraftOrder(creatorID)
+        order, err = r.CreateDraftLogisticRequest(creatorID)
         if err != nil {
             return 0, 0, err
         }
@@ -448,10 +449,10 @@ func (r *Repository) GetCartIcon(creatorID int) (int, int, error) {
 
 // ==================== М-М ЗАЯВКА-УСЛУГА ====================
 
-// AddServiceToOrder - добавление услуги в заявку-черновик
-func (r *Repository) AddServiceToOrder(orderID, serviceID int) error {
+// AddServiceToLogisticRequest - добавление услуги в заявку-черновик
+func (r *Repository) AddServiceToLogisticRequest(orderID, serviceID int) error {
     // Проверяем что заявка - черновик
-    var order ds.Order
+    var order ds.LogisticRequest
     err := r.db.Where("id = ? AND status = ?", orderID, ds.StatusDraft).First(&order).Error
     if err != nil {
         return fmt.Errorf("заявка не найдена или не является черновиком")
@@ -464,8 +465,8 @@ func (r *Repository) AddServiceToOrder(orderID, serviceID int) error {
     }
     
     // Проверяем не добавлена ли уже
-    var existing ds.OrderService
-    err = r.db.Where("order_id = ? AND service_id = ?", orderID, serviceID).First(&existing).Error
+    var existing ds.LogisticRequestService
+    err = r.db.Where("logistic_request_id = ? AND transport_service_id = ?", orderID, serviceID).First(&existing).Error
     if err == nil {
         // Увеличиваем количество
         existing.Quantity++
@@ -473,18 +474,18 @@ func (r *Repository) AddServiceToOrder(orderID, serviceID int) error {
     }
     
     // Добавляем новую
-    orderService := ds.OrderService{
-        OrderID:   orderID,
-        ServiceID: serviceID,
+    orderService := ds.LogisticRequestService{
+        LogisticRequestID:   orderID,
+        TransportServiceID: serviceID,
         Quantity:  1,
     }
     return r.db.Create(&orderService).Error
 }
 
-// RemoveServiceFromOrder - удаление услуги из заявки
-func (r *Repository) RemoveServiceFromOrder(orderID, serviceID int) error {
-    var orderService ds.OrderService
-    err := r.db.Where("order_id = ? AND service_id = ?", orderID, serviceID).First(&orderService).Error
+// RemoveServiceFromLogisticRequest - удаление услуги из заявки
+func (r *Repository) RemoveServiceFromLogisticRequest(orderID, serviceID int) error {
+    var orderService ds.LogisticRequestService
+    err := r.db.Where("logistic_request_id = ? AND transport_service_id = ?", orderID, serviceID).First(&orderService).Error
     if err != nil {
         return fmt.Errorf("услуга не найдена в заявке")
     }
@@ -492,16 +493,16 @@ func (r *Repository) RemoveServiceFromOrder(orderID, serviceID int) error {
     return r.db.Delete(&orderService).Error
 }
 
-// UpdateOrderService - обновление количества/порядка в м-м
-func (r *Repository) UpdateOrderService(orderID, serviceID int, quantity, orderNum int, comment string) error {
-    var orderService ds.OrderService
-    err := r.db.Where("order_id = ? AND service_id = ?", orderID, serviceID).First(&orderService).Error
+// UpdateLogisticRequestService - обновление количества/порядка в м-м
+func (r *Repository) UpdateLogisticRequestService(orderID, serviceID int, quantity, orderNum int, comment string) error {
+    var orderService ds.LogisticRequestService
+    err := r.db.Where("logistic_request_id = ? AND transport_service_id = ?", orderID, serviceID).First(&orderService).Error
     if err != nil {
         return fmt.Errorf("услуга не найдена в заявке")
     }
     
     orderService.Quantity = quantity
-    orderService.Order = orderNum
+    orderService.SortOrder = orderNum
     orderService.Comment = comment
     
     return r.db.Save(&orderService).Error
@@ -509,11 +510,11 @@ func (r *Repository) UpdateOrderService(orderID, serviceID int, quantity, orderN
 
 
 // AddToCart - добавление услуги в корзину
-func (r *Repository) ensureDraftOrder(sessionID string) (int, error) {
-    var order ds.Order
+func (r *Repository) ensureDraftLogisticRequest(sessionID string) (int, error) {
+    var order ds.LogisticRequest
     if err := r.db.Where("session_id = ? AND is_draft = ? AND deleted_at IS NULL", sessionID, true).First(&order).Error; err != nil {
         // создаём с системным создателем
-        order = ds.Order{
+        order = ds.LogisticRequest{
             SessionID: sessionID, 
             IsDraft: true,
             CreatorID: ds.GetCreatorID(),
@@ -532,86 +533,98 @@ func (r *Repository) AddToCart(serviceID int) error {
         return fmt.Errorf("услуга не найдена")
     }
     // берём черновой заказ как корзину
-    orderID, err := r.ensureDraftOrder("guest")
+    orderID, err := r.ensureDraftLogisticRequest("guest")
     if err != nil { return err }
 
-    // upsert в order_services
+    // upsert в logistic_request_services
     // используем нативное подключение для ON CONFLICT
     sqlDB, err := r.db.DB(); if err != nil { return err }
     _, err = sqlDB.Exec(`
-        INSERT INTO order_services(order_id, service_id, quantity)
+        INSERT INTO logistic_request_services(logistic_request_id, transport_service_id, quantity)
         VALUES ($1, $2, 1)
-        ON CONFLICT (order_id, service_id)
-        DO UPDATE SET quantity = order_services.quantity + 1
+        ON CONFLICT (logistic_request_id, transport_service_id)
+        DO UPDATE SET quantity = logistic_request_services.quantity + 1
     `, orderID, serviceID)
     return err
 }
 
 // RemoveFromCart - удаление услуги из корзины
 func (r *Repository) RemoveFromCart(serviceID int) error {
-    orderID, err := r.ensureDraftOrder("guest")
+    orderID, err := r.ensureDraftLogisticRequest("guest")
     if err != nil { return err }
 
     sqlDB, err := r.db.DB(); if err != nil { return err }
     // уменьшаем qty если >1, иначе удаляем
     var qty int
-    err = sqlDB.QueryRow(`SELECT quantity FROM order_services WHERE order_id=$1 AND service_id=$2`, orderID, serviceID).Scan(&qty)
+    err = sqlDB.QueryRow(`SELECT quantity FROM logistic_request_services WHERE logistic_request_id=$1 AND transport_service_id=$2`, orderID, serviceID).Scan(&qty)
     if err == sql.ErrNoRows { return fmt.Errorf("услуга не найдена в корзине") }
     if err != nil { return err }
 
     if qty > 1 {
-        _, err = sqlDB.Exec(`UPDATE order_services SET quantity = quantity - 1 WHERE order_id=$1 AND service_id=$2`, orderID, serviceID)
+        _, err = sqlDB.Exec(`UPDATE logistic_request_services SET quantity = quantity - 1 WHERE logistic_request_id=$1 AND transport_service_id=$2`, orderID, serviceID)
     } else {
-        _, err = sqlDB.Exec(`DELETE FROM order_services WHERE order_id=$1 AND service_id=$2`, orderID, serviceID)
+        _, err = sqlDB.Exec(`DELETE FROM logistic_request_services WHERE logistic_request_id=$1 AND transport_service_id=$2`, orderID, serviceID)
     }
     return err
 }
 
 // GetCart - получение корзины
 func (r *Repository) GetCart() (ds.Cart, error) {
-    orderID, err := r.ensureDraftOrder("guest")
+    orderID, err := r.ensureDraftLogisticRequest("guest")
     if err != nil { return ds.Cart{}, err }
     var items []ds.CartService
-    if err := r.db.Where("order_id = ?", orderID).Find(&items).Error; err != nil {
+    if err := r.db.Where("logistic_request_id = ?", orderID).Find(&items).Error; err != nil {
         return ds.Cart{}, err
     }
     return ds.Cart{ID: orderID, SessionID: "guest", IsDraft: true, Services: items}, nil
 }
 
 // GetCartServices - получение услуг в корзине с полной информацией
-func (r *Repository) GetCartServices() ([]ds.Service, error) {
-    orderID, err := r.ensureDraftOrder("guest")
-    if err != nil { return nil, err }
-    var items []ds.CartService
-    if err := r.db.Where("order_id = ?", orderID).Find(&items).Error; err != nil { return nil, err }
-    services := make([]ds.Service, 0, len(items))
-    for _, it := range items {
-        s, err := r.GetService(it.ServiceID)
-        if err == nil { services = append(services, s) }
+func (r *Repository) GetCartServices() ([]ds.TransportService, error) {
+    orderID, err := r.ensureDraftLogisticRequest("guest")
+    if err != nil { 
+        logrus.Errorf("GetCartServices: failed to ensure draft request: %v", err)
+        return nil, err 
     }
+    var items []ds.CartService
+    if err := r.db.Where("logistic_request_id = ?", orderID).Find(&items).Error; err != nil { 
+        logrus.Errorf("GetCartServices: failed to find cart items: %v", err)
+        return nil, err 
+    }
+    logrus.Infof("GetCartServices: found %d items in cart for orderID %d", len(items), orderID)
+    services := make([]ds.TransportService, 0, len(items))
+    for _, it := range items {
+        s, err := r.GetService(it.TransportServiceID)
+        if err != nil {
+            logrus.Errorf("GetCartServices: failed to get service %d: %v", it.TransportServiceID, err)
+        } else {
+            services = append(services, s)
+        }
+    }
+    logrus.Infof("GetCartServices: returning %d services", len(services))
     return services, nil
 }
 
 // GetCartCount - получение общего количества услуг в корзине
 func (r *Repository) GetCartCount() int {
-    orderID, err := r.ensureDraftOrder("guest")
+    orderID, err := r.ensureDraftLogisticRequest("guest")
     if err != nil { return 0 }
     sqlDB, err := r.db.DB(); if err != nil { return 0 }
     var count sql.NullInt64
-    _ = sqlDB.QueryRow(`SELECT COALESCE(SUM(quantity),0) FROM order_services WHERE order_id=$1`, orderID).Scan(&count)
+    _ = sqlDB.QueryRow(`SELECT COALESCE(SUM(quantity),0) FROM logistic_request_services WHERE logistic_request_id=$1`, orderID).Scan(&count)
     if count.Valid { return int(count.Int64) }
     return 0
 }
 
 // ClearCart - очистка корзины
 func (r *Repository) ClearCart() {
-    orderID, err := r.ensureDraftOrder("guest")
+    orderID, err := r.ensureDraftLogisticRequest("guest")
     if err != nil { return }
-    r.db.Where("order_id = ?", orderID).Delete(&ds.CartService{})
+    r.db.Where("logistic_request_id = ?", orderID).Delete(&ds.CartService{})
 }
 
-// UpdateOrderStatusWithCursor - обновление статуса заказа через курсор без ORM
-func (r *Repository) UpdateOrderStatusWithCursor(orderID int, newStatus string) error {
+// UpdateLogisticRequestStatusWithCursor - обновление статуса заказа через курсор без ORM
+func (r *Repository) UpdateLogisticRequestStatusWithCursor(orderID int, newStatus string) error {
 	// Получаем нативное подключение к БД из GORM
 	sqlDB, err := r.db.DB()
 	if err != nil {
@@ -620,7 +633,7 @@ func (r *Repository) UpdateOrderStatusWithCursor(orderID int, newStatus string) 
 
 	// Подготавливаем запрос с курсором
 	query := `
-		UPDATE orders 
+		UPDATE logistic_requests 
 		SET status = $1 
 		WHERE id = $2
 		RETURNING id, status, from_city, to_city
@@ -644,7 +657,7 @@ func (r *Repository) UpdateOrderStatusWithCursor(orderID int, newStatus string) 
 		}
 		
 		// Логируем обновление
-		fmt.Printf("Order %d status updated to: %s (Route: %s -> %s)\n", id, status, fromCity, toCity)
+		fmt.Printf("LogisticRequest %d status updated to: %s (Route: %s -> %s)\n", id, status, fromCity, toCity)
 	} else {
 		return fmt.Errorf("order with id %d not found", orderID)
 	}

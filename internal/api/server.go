@@ -27,7 +27,7 @@ func StartServer() {
 	// Маршруты для четырех страниц
 	r.GET("/", handler.GetServices)                    // Главная страница со списком услуг
 	r.GET("/service/:id", handler.GetService)          // Страница с подробной информацией об услуге
-	r.GET("/order", handler.GetOrderDetails)           // Страница с деталями заявки
+	r.GET("/order", handler.GetLogisticRequestDetails)           // Страница с деталями заявки
 	r.GET("/calculator", handler.GetCalculator)        // Страница калькулятора
 	r.POST("/calculator", handler.PostCalculator)      // Обработка формы калькулятора
 
@@ -40,27 +40,27 @@ func StartServer() {
 	// API маршруты для калькулятора (переименованы под грузоперевозки)
 	r.POST("/api/searchtrans", handler.SearchTransport) // Поиск транспорта
 	r.POST("/api/calculatecargo", handler.CalculateService) // Расчет стоимости грузоперевозки
-	r.POST("/api/submitcargoorder", handler.SubmitOrder) // Отправка заявки на грузоперевозку
+	r.POST("/api/submitcargoorder", handler.SubmitLogisticRequest) // Отправка заявки на грузоперевозку
 
     // API маршруты для заявок — старые алиасы
-    r.GET("/api/orders", handler.GetOrders)
-    r.PUT("/api/orders/:id/form", handler.FormOrder)
-    r.PUT("/api/orders/:id/complete", handler.CompleteOrder)
-    r.DELETE("/api/orders/:id/services/:service_id", handler.RemoveServiceFromOrder)
-    r.PUT("/api/orders/:id/services/:service_id", handler.UpdateOrderService)
-    r.GET("/api/orders/:id", handler.GetOrder)
-    r.PUT("/api/orders/:id", handler.UpdateOrder)
-    r.DELETE("/api/orders/:id", handler.DeleteOrder)
+    r.GET("/api/orders", handler.GetLogisticRequests)
+    r.PUT("/api/orders/:id/form", handler.FormLogisticRequest)
+    r.PUT("/api/orders/:id/complete", handler.CompleteLogisticRequest)
+    r.DELETE("/api/orders/:id/services/:service_id", handler.RemoveServiceFromLogisticRequest)
+    r.PUT("/api/orders/:id/services/:service_id", handler.UpdateLogisticRequestService)
+    r.GET("/api/orders/:id", handler.GetLogisticRequest)
+    r.PUT("/api/orders/:id", handler.UpdateLogisticRequest)
+    r.DELETE("/api/orders/:id", handler.DeleteLogisticRequest)
 
     // Новые маршруты для логистических заявок
-    r.GET("/api/logistic-requests", handler.GetOrders)
-    r.PUT("/api/logistic-requests/:id/form", handler.FormOrder)
-    r.PUT("/api/logistic-requests/:id/complete", handler.CompleteOrder)
-    r.DELETE("/api/logistic-requests/:id/services/:service_id", handler.RemoveServiceFromOrder)
-    r.PUT("/api/logistic-requests/:id/services/:service_id", handler.UpdateOrderService)
-    r.GET("/api/logistic-requests/:id", handler.GetOrder)
-    r.PUT("/api/logistic-requests/:id", handler.UpdateOrder)
-    r.DELETE("/api/logistic-requests/:id", handler.DeleteOrder)
+    r.GET("/api/logistic-requests", handler.GetLogisticRequests)
+    r.PUT("/api/logistic-requests/:id/form", handler.FormLogisticRequest)
+    r.PUT("/api/logistic-requests/:id/complete", handler.CompleteLogisticRequest)
+    r.DELETE("/api/logistic-requests/:id/services/:service_id", handler.RemoveServiceFromLogisticRequest)
+    r.PUT("/api/logistic-requests/:id/services/:service_id", handler.UpdateLogisticRequestService)
+    r.GET("/api/logistic-requests/:id", handler.GetLogisticRequest)
+    r.PUT("/api/logistic-requests/:id", handler.UpdateLogisticRequest)
+    r.DELETE("/api/logistic-requests/:id", handler.DeleteLogisticRequest)
 
 	// API маршруты для пользователей
 	r.POST("/api/users/register", handler.RegisterUser)   // Регистрация пользователя

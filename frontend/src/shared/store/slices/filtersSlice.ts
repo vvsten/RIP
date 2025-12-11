@@ -1,11 +1,11 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
-import type { ServiceFilters } from '../../types/Service';
+import type { TransportServiceFilters } from '../../types/TransportService';
 
 /**
  * Начальное состояние фильтров
  */
 interface FiltersState {
-  filters: ServiceFilters;
+  filters: TransportServiceFilters;
 }
 
 const initialState: FiltersState = {
@@ -25,7 +25,7 @@ const filtersSlice = createSlice({
     /**
      * Устанавливает новые фильтры
      */
-    setFilters: (state, action: PayloadAction<ServiceFilters>) => {
+    setFilters: (state, action: PayloadAction<TransportServiceFilters>) => {
       state.filters = action.payload;
     },
     /**
@@ -37,7 +37,7 @@ const filtersSlice = createSlice({
     /**
      * Обновляет конкретное поле фильтра
      */
-    updateFilter: (state, action: PayloadAction<Partial<ServiceFilters>>) => {
+    updateFilter: (state, action: PayloadAction<Partial<TransportServiceFilters>>) => {
       state.filters = { ...state.filters, ...action.payload };
     },
   },

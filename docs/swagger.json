@@ -30,7 +30,7 @@
                 "parameters": [
                     {
                         "type": "string",
-                        "description": "Order status filter",
+                        "description": "LogisticRequest status filter",
                         "name": "status",
                         "in": "query"
                     },
@@ -49,7 +49,7 @@
                 ],
                 "responses": {
                     "200": {
-                        "description": "Orders retrieved successfully",
+                        "description": "LogisticRequests retrieved successfully",
                         "schema": {
                             "type": "object",
                             "additionalProperties": true
@@ -97,13 +97,13 @@
                 "parameters": [
                     {
                         "type": "integer",
-                        "description": "Order ID",
+                        "description": "LogisticRequest ID",
                         "name": "id",
                         "in": "path",
                         "required": true
                     },
                     {
-                        "description": "Order status (completed/rejected)",
+                        "description": "LogisticRequest status (completed/rejected)",
                         "name": "request",
                         "in": "body",
                         "required": true,
@@ -117,7 +117,7 @@
                 ],
                 "responses": {
                     "200": {
-                        "description": "Order completed successfully",
+                        "description": "LogisticRequest completed successfully",
                         "schema": {
                             "type": "object",
                             "additionalProperties": {
@@ -175,7 +175,7 @@
                 "summary": "Submit cargo order",
                 "parameters": [
                     {
-                        "description": "Order data with services",
+                        "description": "LogisticRequest data with services",
                         "name": "request",
                         "in": "body",
                         "required": true,
@@ -187,7 +187,7 @@
                 ],
                 "responses": {
                     "201": {
-                        "description": "Order submitted successfully",
+                        "description": "LogisticRequest submitted successfully",
                         "schema": {
                             "type": "object",
                             "additionalProperties": true

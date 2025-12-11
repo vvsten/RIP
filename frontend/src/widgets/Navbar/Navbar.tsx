@@ -11,7 +11,7 @@ import { getApiUrl } from '../../shared/config/apiConfig';
 export function Navbar() {
   const location = useLocation();
   const [cartCount, setCartCount] = useState<number>(0);
-  const [orderId, setOrderId] = useState<number | null>(null);
+  const [logisticRequestId, setLogisticRequestId] = useState<number | null>(null);
 
   // Загружаем количество в корзине при монтировании и при изменении страницы
   useEffect(() => {
@@ -23,7 +23,7 @@ export function Navbar() {
           const count = typeof data?.count === 'number' ? data.count : 0;
           const id = data?.cart?.id || data?.id || null;
           setCartCount(count);
-          setOrderId(id);
+          setLogisticRequestId(id);
           return;
         }
       } catch {}
@@ -38,7 +38,7 @@ export function Navbar() {
     loadCart();
   }, [location.pathname]);
 
-  const calculatorHref = orderId ? `/calculator?order_id=${orderId}` : '/calculator';
+  const calculatorHref = logisticRequestId ? `/calculator?request_id=${logisticRequestId}` : '/calculator';
   const isCalculatorDisabled = cartCount <= 0;
 
   return (
@@ -58,7 +58,7 @@ export function Navbar() {
         {location.pathname !== '/about' && (
           <Link to="/about" className="home-btn">ℹ️ О компании</Link>
         )}
-        {/* Кнопка калькулятора с бейджем количества */}
+        {/* Кнопка калькулятора с бейджем количества - используем обычную ссылку, чтобы не перехватывалась React Router */}
         {isCalculatorDisabled ? (
           <span className="home-btn" style={{ opacity: 0.5, cursor: 'not-allowed' }}>
             🧮 Калькулятор
@@ -72,7 +72,7 @@ export function Navbar() {
             }}>{cartCount}</span>}
           </span>
         ) : (
-          <Link to={calculatorHref} className="home-btn" style={{ position: 'relative' }}>
+          <a href={calculatorHref} className="home-btn" style={{ position: 'relative', textDecoration: 'none' }}>
             🧮 Калькулятор
             {cartCount > 0 && <span style={{ 
               position: 'absolute',
@@ -91,7 +91,7 @@ export function Navbar() {
               border: '2px solid white',
               boxShadow: '0 2px 6px rgba(255, 68, 68, 0.4)'
             }}>{cartCount}</span>}
-          </Link>
+          </a>
         )}
       </div>
     </header>

@@ -2,8 +2,8 @@ package ds
 
 import "time"
 
-// Service - модель услуги (тип транспорта)
-type Service struct {
+// TransportService - модель услуги (вид грузоперевозки)
+type TransportService struct {
 	ID           int     `json:"id" gorm:"primaryKey"`
 	Name         string  `json:"name" gorm:"not null"`
 	Description  string  `json:"description" gorm:"type:text"`
@@ -17,4 +17,8 @@ type Service struct {
 	CreatedAt time.Time  `json:"created_at" gorm:"autoCreateTime"`
 	UpdatedAt time.Time  `json:"updated_at" gorm:"autoUpdateTime"`
 	DeletedAt *time.Time `json:"-" gorm:"index"`
+}
+
+func (TransportService) TableName() string {
+	return "transport_services"
 }

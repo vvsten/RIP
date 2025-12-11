@@ -1,5 +1,4 @@
 import { useEffect, useState } from 'react';
-import { Link } from 'react-router-dom';
 
 /**
  * Кнопка калькулятора/корзины как в шаблоне index.html
@@ -7,7 +6,7 @@ import { Link } from 'react-router-dom';
  */
 export function CalculatorShortcut() {
   const [count, setCount] = useState<number>(0);
-  const [orderId, setOrderId] = useState<number | null>(null);
+  const [logisticRequestId, setLogisticRequestId] = useState<number | null>(null);
 
   useEffect(() => {
     const load = async () => {
@@ -19,7 +18,7 @@ export function CalculatorShortcut() {
           const c = typeof data?.count === 'number' ? data.count : 0;
           const id = data?.cart?.id || data?.id || null;
           setCount(c);
-          setOrderId(id);
+          setLogisticRequestId(id);
           return;
         }
       } catch {}
@@ -34,7 +33,7 @@ export function CalculatorShortcut() {
     load();
   }, []);
 
-  const href = orderId ? `/calculator?order_id=${orderId}` : '/calculator';
+  const href = logisticRequestId ? `/calculator?request_id=${logisticRequestId}` : '/calculator';
   const isDisabled = count <= 0;
 
   return (
@@ -45,10 +44,10 @@ export function CalculatorShortcut() {
           <span className="cart-count" id="cartCount">{count || ''}</span>
         </a>
       ) : (
-        <Link to={href} className="calculator-btn">
+        <a href={href} className="calculator-btn" style={{ textDecoration: 'none' }}>
           🧮 Калькулятор
           <span className="cart-count" id="cartCount">{count}</span>
-        </Link>
+        </a>
       )}
     </div>
   );

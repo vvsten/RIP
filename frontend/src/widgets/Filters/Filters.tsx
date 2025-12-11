@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useAppSelector } from '../../shared/store/hooks';
-import type { ServiceFilters } from '../../shared/types/Service';
+import type { TransportServiceFilters } from '../../shared/types/TransportService';
 
 /**
  * Props для компонента Filters
@@ -10,7 +10,7 @@ interface FiltersProps {
    * Callback функция, вызываемая при изменении фильтров
    * Принимает объект с параметрами фильтрации
    */
-  onFilterChange: (filters: ServiceFilters) => void;
+  onFilterChange: (filters: TransportServiceFilters) => void;
 }
 
 /**
@@ -37,8 +37,8 @@ export function Filters({ onFilterChange }: FiltersProps) {
   /**
    * Формирует объект фильтров из текущих полей
    */
-  const buildFilters = (): ServiceFilters => {
-    const filters: ServiceFilters = {};
+  const buildFilters = (): TransportServiceFilters => {
+    const filters: TransportServiceFilters = {};
     if (search) filters.search = search;
     return filters;
   };

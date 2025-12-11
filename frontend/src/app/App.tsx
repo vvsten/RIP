@@ -20,23 +20,23 @@ import '../css/style.css';
 export function App() {
   return (
     <Provider store={store}>
-      <BrowserRouter>
+    <BrowserRouter>
         {/* Компонент настройки сервера для Tauri (отображается только в Tauri) */}
         <ServerConfig />
         
-        {/* Навигационная панель - всегда вверху */}
-        <Navbar />
-        
-        {/* Навигационная цепочка - отображается на нужных страницах */}
-        <Breadcrumbs />
-        
-        {/* Маршруты для трех страниц */}
-        <Routes>
-          <Route path="/" element={<Home />} />
-          <Route path="/services" element={<Services />} />
-          <Route path="/about" element={<About />} />
-        </Routes>
-      </BrowserRouter>
+      {/* Навигационная панель - всегда вверху */}
+      <Navbar />
+      
+      {/* Навигационная цепочка - отображается на нужных страницах */}
+      <Breadcrumbs />
+      
+      {/* Маршруты для трех страниц */}
+      <Routes>
+        <Route path="/" element={<Home />} />
+        <Route path="/services" element={<Services />} />
+        <Route path="/about" element={<About />} />
+      </Routes>
+    </BrowserRouter>
     </Provider>
   );
 }

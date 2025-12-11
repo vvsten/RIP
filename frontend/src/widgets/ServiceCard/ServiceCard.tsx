@@ -1,11 +1,11 @@
-import type { Service } from '../../shared/types/Service';
+import type { TransportService } from '../../shared/types/TransportService';
 
 /**
  * Props для компонента ServiceCard
  */
 interface ServiceCardProps {
   /** Данные услуги для отображения */
-  service: Service;
+  service: TransportService;
 }
 
 /**

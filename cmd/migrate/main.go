@@ -15,8 +15,60 @@ func main() {
 		panic("failed to connect database")
 	}
 
+	// Совместимость: переименовываем старые таблицы/последовательности, если они еще не переименованы
+	sqlDB, _ := db.DB()
+	
+	// Проверяем и переименовываем таблицы
+	var tableExists int
+	sqlDB.QueryRow(`SELECT COUNT(*) FROM information_schema.tables WHERE table_name = 'services' AND table_schema = 'public'`).Scan(&tableExists)
+	if tableExists > 0 {
+		sqlDB.Exec(`ALTER TABLE services RENAME TO transport_services`)
+	}
+	
+	sqlDB.QueryRow(`SELECT COUNT(*) FROM information_schema.tables WHERE table_name = 'orders' AND table_schema = 'public'`).Scan(&tableExists)
+	if tableExists > 0 {
+		sqlDB.Exec(`ALTER TABLE orders RENAME TO logistic_requests`)
+	}
+	
+	sqlDB.QueryRow(`SELECT COUNT(*) FROM information_schema.tables WHERE table_name = 'order_services' AND table_schema = 'public'`).Scan(&tableExists)
+	if tableExists > 0 {
+		sqlDB.Exec(`ALTER TABLE order_services RENAME TO logistic_request_services`)
+	}
+	
+	// Переименовываем последовательности
+	sqlDB.QueryRow(`SELECT COUNT(*) FROM information_schema.sequences WHERE sequence_name = 'services_id_seq' AND sequence_schema = 'public'`).Scan(&tableExists)
+	if tableExists > 0 {
+		sqlDB.Exec(`ALTER SEQUENCE services_id_seq RENAME TO transport_services_id_seq`)
+	}
+	
+	sqlDB.QueryRow(`SELECT COUNT(*) FROM information_schema.sequences WHERE sequence_name = 'orders_id_seq' AND sequence_schema = 'public'`).Scan(&tableExists)
+	if tableExists > 0 {
+		sqlDB.Exec(`ALTER SEQUENCE orders_id_seq RENAME TO logistic_requests_id_seq`)
+	}
+	
+	sqlDB.QueryRow(`SELECT COUNT(*) FROM information_schema.sequences WHERE sequence_name = 'order_services_id_seq' AND sequence_schema = 'public'`).Scan(&tableExists)
+	if tableExists > 0 {
+		sqlDB.Exec(`ALTER SEQUENCE order_services_id_seq RENAME TO logistic_request_services_id_seq`)
+	}
+	
+	// Переименовываем колонки, если они существуют
+	sqlDB.QueryRow(`SELECT COUNT(*) FROM information_schema.columns WHERE table_name = 'logistic_request_services' AND column_name = 'service_id' AND table_schema = 'public'`).Scan(&tableExists)
+	if tableExists > 0 {
+		sqlDB.Exec(`ALTER TABLE logistic_request_services RENAME COLUMN service_id TO transport_service_id`)
+	}
+	
+	sqlDB.QueryRow(`SELECT COUNT(*) FROM information_schema.columns WHERE table_name = 'logistic_request_services' AND column_name = 'order_id' AND table_schema = 'public'`).Scan(&tableExists)
+	if tableExists > 0 {
+		sqlDB.Exec(`ALTER TABLE logistic_request_services RENAME COLUMN order_id TO logistic_request_id`)
+	}
+	
+	// Обновляем DEFAULT для последовательностей
+	sqlDB.Exec(`ALTER TABLE IF EXISTS transport_services ALTER COLUMN id SET DEFAULT nextval('transport_services_id_seq')`)
+	sqlDB.Exec(`ALTER TABLE IF EXISTS logistic_requests ALTER COLUMN id SET DEFAULT nextval('logistic_requests_id_seq')`)
+	sqlDB.Exec(`ALTER TABLE IF EXISTS logistic_request_services ALTER COLUMN id SET DEFAULT nextval('logistic_request_services_id_seq')`)
+
 	// Обновляем существующие записи с NULL creator_id
-	db.Model(&ds.Order{}).Where("creator_id IS NULL OR creator_id = 0").Updates(map[string]interface{}{
+	db.Model(&ds.LogisticRequest{}).Where("creator_id IS NULL OR creator_id = 0").Updates(map[string]interface{}{
 		"creator_id": 1, // системный создатель
 		"status":     ds.StatusDraft,
 		"is_draft":   true,
@@ -25,9 +77,9 @@ func main() {
 	// Migrate the schema
 	err = db.AutoMigrate(
 		&ds.User{},
-		&ds.Service{},
-		&ds.Order{},
-		&ds.OrderService{},
+		&ds.TransportService{},
+		&ds.LogisticRequest{},
+		&ds.LogisticRequestService{},
 	)
 	if err != nil {
 		panic("cant migrate db")
@@ -41,7 +93,7 @@ func main() {
 			Email:    "creator@example.com",
 			Password: "$2a$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi", // password
 			Name:     "Создатель",
-			Role:     ds.RoleUser,
+			Role:     ds.RoleBuyer,
 		},
 		{
 			ID:       2,
@@ -49,7 +101,7 @@ func main() {
 			Email:    "moderator@example.com",
 			Password: "$2a$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi", // password
 			Name:     "Модератор",
-			Role:     ds.RoleModerator,
+			Role:     ds.RoleManager,
 		},
 	}
 
@@ -62,7 +114,7 @@ func main() {
 	}
 
 	// Создаем начальные данные
-	services := []ds.Service{
+	services := []ds.TransportService{
 		{
 			ID:           1,
 			Name:         "Фура",
@@ -127,7 +179,7 @@ func main() {
 
 	// Создаем услуги в БД
 	for _, service := range services {
-		var existingService ds.Service
+		var existingService ds.TransportService
 		err := db.Where("id = ?", service.ID).First(&existingService).Error
 		if err != nil {
 			// Услуга не существует, создаем
@@ -136,10 +188,10 @@ func main() {
 	}
 
 	// Создаем пример заявки
-	var existingOrder ds.Order
-	err = db.Where("id = ?", 1).First(&existingOrder).Error
+	var existingLogisticRequest ds.LogisticRequest
+	err = db.Where("id = ?", 1).First(&existingLogisticRequest).Error
 	if err != nil {
-		order := ds.Order{
+		order := ds.LogisticRequest{
 			ID:        1,
 			CreatorID: 1, // системный создатель
 			FromCity:  "Москва",
@@ -156,9 +208,9 @@ func main() {
 		db.Create(&order)
 
 		// Создаем услуги в заявке
-		orderServices := []ds.OrderService{
-			{OrderID: 1, ServiceID: 1, Quantity: 1, Comment: "Основная доставка", Order: 1},
-			{OrderID: 1, ServiceID: 2, Quantity: 1, Comment: "Дополнительная услуга", Order: 2},
+		orderServices := []ds.LogisticRequestService{
+			{LogisticRequestID: 1, TransportServiceID: 1, Quantity: 1, Comment: "Основная доставка", SortOrder: 1},
+			{LogisticRequestID: 1, TransportServiceID: 2, Quantity: 1, Comment: "Дополнительная услуга", SortOrder: 2},
 		}
 		for _, orderService := range orderServices {
 			db.Create(&orderService)

@@ -1,11 +1,11 @@
-import type { Service, ServiceFilters, ServiceRaw } from '../types/Service';
+import type { TransportService, TransportServiceFilters, TransportServiceRaw } from '../types/TransportService';
 import { getApiUrl, getServerIPAddress, isTauriApp } from '../config/apiConfig';
 
 /**
  * Конвертирует сырой формат Service из API (snake_case) в camelCase
  * Также преобразует полный URL MinIO в относительный путь для прокси или IP для Tauri
  */
-function convertService(raw: ServiceRaw): Service {
+function convertService(raw: TransportServiceRaw): TransportService {
   // Преобразуем полный URL в относительный путь для прокси или IP для Tauri
   let imageUrl = raw.image_url;
   if (imageUrl) {
@@ -17,15 +17,18 @@ function convertService(raw: ServiceRaw): Service {
         const ipMatch = serverIP.match(/https?:\/\/([^:]+)/);
         if (ipMatch) {
           const ip = ipMatch[1];
-          imageUrl = imageUrl.replace('http://localhost:9003', `http://${ip}:9003`);
+          // Для Tauri используем прокси через бэкенд
+          imageUrl = imageUrl.replace('http://localhost:9003', `${serverIP}`);
           console.log(`[Tauri] Converted image URL: ${raw.image_url} -> ${imageUrl}`);
         }
       } else {
         console.warn('[Tauri] Server IP not configured, using original image URL');
       }
     } else if (imageUrl.startsWith('http://localhost:9003/')) {
-      // Для веб-версии используем относительный путь для прокси
+      // Для веб-версии используем относительный путь через прокси бэкенда
+      // Бэкенд проксирует /lab1/* к MinIO
       imageUrl = imageUrl.replace('http://localhost:9003', '');
+      console.log(`[Web] Converted image URL: ${raw.image_url} -> ${imageUrl}`);
     }
   }
   
@@ -47,7 +50,7 @@ function convertService(raw: ServiceRaw): Service {
  * Mock данные для fallback когда бэкенд недоступен
  * Имитируют реальные данные услуг по транспортировке грузов
  */
-const MOCK_SERVICES: Service[] = [
+const MOCK_SERVICES: TransportService[] = [
   {
     id: 1,
     name: 'Фура',
@@ -127,7 +130,7 @@ const MOCK_SERVICES: Service[] = [
  * @param filters - параметры фильтрации
  * @returns query string (например: "?search=truck&minPrice=1000")
  */
-function buildQueryString(filters: ServiceFilters): string {
+function buildQueryString(filters: TransportServiceFilters): string {
   const params = new URLSearchParams();
   
   if (filters.search) params.append('search', filters.search);
@@ -144,7 +147,7 @@ function buildQueryString(filters: ServiceFilters): string {
  * Имитирует серверную фильтрацию на mock данных
  * Используется когда бэкенд недоступен
  */
-function filterMockServices(services: Service[], filters: ServiceFilters): Service[] {
+function filterMockServices(services: TransportService[], filters: TransportServiceFilters): TransportService[] {
   return services.filter(service => {
     // Поиск по названию и описанию
     if (filters.search) {
@@ -186,10 +189,10 @@ function filterMockServices(services: Service[], filters: ServiceFilters): Servi
  * 2. Если сервер недоступен → возвращает mock данные
  * 3. Если сервер доступен → серверная фильтрация, иначе локальная на mock
  */
-export async function fetchServices(filters: ServiceFilters = {}): Promise<Service[]> {
+export async function fetchTransportServices(filters: TransportServiceFilters = {}): Promise<TransportService[]> {
   try {
     const queryString = buildQueryString(filters);
-    const response = await fetch(getApiUrl(`/api/services${queryString}`));
+    const response = await fetch(getApiUrl(`/api/transport-services${queryString}`));
     
     if (!response.ok) {
       throw new Error(`HTTP error! status: ${response.status}`);
@@ -198,7 +201,7 @@ export async function fetchServices(filters: ServiceFilters = {}): Promise<Servi
     const data = await response.json();
     
     // Если ответ содержит поле services, берем его
-    let services: ServiceRaw[] = [];
+    let services: TransportServiceRaw[] = [];
     if (data.services && Array.isArray(data.services)) {
       services = data.services;
     } else if (Array.isArray(data)) {
@@ -221,9 +224,9 @@ export async function fetchServices(filters: ServiceFilters = {}): Promise<Servi
 /**
  * Получение одной услуги по ID
  */
-export async function fetchService(id: number): Promise<Service | null> {
+export async function fetchTransportService(id: number): Promise<TransportService | null> {
   try {
-    const response = await fetch(getApiUrl(`/api/services/${id}`));
+    const response = await fetch(getApiUrl(`/api/transport-services/${id}`));
     
     if (!response.ok) {
       throw new Error(`HTTP error! status: ${response.status}`);

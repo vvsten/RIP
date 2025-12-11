@@ -106,7 +106,7 @@
                                 <div class="result-field" id="totalCost">0 рублей</div>
                             </div>
                         </div>
-                        <button type="button" class="submit-btn" onclick="submitOrder()">Оформить заявку</button>
+                        <button type="button" class="submit-btn" onclick="submitLogisticRequest()">Оформить заявку</button>
                     </div>
                 {{ else }}
                     <div class="no-services">
@@ -125,7 +125,7 @@
             try {
                 // Получаем ID заявки из URL или из глобальной переменной
                 const urlParams = new URLSearchParams(window.location.search);
-                const orderId = urlParams.get('order_id') || getCurrentOrderId();
+                const orderId = urlParams.get('request_id') || getCurrentLogisticRequestId();
                 
                 console.log('Попытка удаления заявки с ID:', orderId);
                 
@@ -193,17 +193,17 @@
         }
 
         // Функция для получения ID текущей заявки
-        function getCurrentOrderId() {
+        function getCurrentLogisticRequestId() {
             // Пытаемся получить из глобальной переменной
-            if (window.currentOrderId) {
-                return window.currentOrderId;
+            if (window.currentLogisticRequestId) {
+                return window.currentLogisticRequestId;
             }
             
             // Пытаемся получить из URL параметров
             const urlParams = new URLSearchParams(window.location.search);
-            const orderId = urlParams.get('order_id');
+            const orderId = urlParams.get('request_id');
             if (orderId) {
-                window.currentOrderId = orderId;
+                window.currentLogisticRequestId = orderId;
                 return orderId;
             }
             
@@ -344,7 +344,7 @@
         }
 
         // Функция для отправки заявки
-        function submitOrder() {
+        function submitLogisticRequest() {
             const serviceForms = document.querySelectorAll('.service-calculator-form');
             if (serviceForms.length === 0) {
                 showNotification('Нет услуг для оформления заявки', 'error');
@@ -379,14 +379,14 @@
             })
             .then(response => response.json())
             .then(data => {
-                if (data.success) {
+                if (data.success || data.status === 'success') {
                     showNotification('Заявка успешно оформлена!', 'success');
                     // Очищаем корзину и перезагружаем страницу
                     setTimeout(() => {
                         window.location.reload();
                     }, 2000);
                 } else {
-                    showNotification('Ошибка при оформлении заявки: ' + data.error, 'error');
+                    showNotification('Ошибка при оформлении заявки: ' + (data.error || data.message || 'Неизвестная ошибка'), 'error');
                 }
             })
             .catch(error => {
@@ -441,8 +441,8 @@
             fetch('/api/cart/icon')
                 .then(response => response.json())
                 .then(data => {
-                    if (data.order_id) {
-                        window.currentOrderId = data.order_id;
+                    if (data.request_id) {
+                        window.currentLogisticRequestId = data.request_id;
                     }
                 })
                 .catch(error => {
