@@ -14,6 +14,7 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"strings"
 	"time"
 
 	"github.com/gin-contrib/cors"
@@ -144,6 +145,27 @@ func main() {
 
 	// Регистрируем маршруты
 	registerRoutes(r, handler)
+	
+	// Обработчик для неизвестных маршрутов (SPA fallback)
+	// Игнорируем запросы к фронтенд маршрутам, которые должны обрабатываться React Router
+	r.NoRoute(func(c *gin.Context) {
+		path := c.Request.URL.Path
+		// Если это запрос к фронтенд маршруту (не API и не статика), возвращаем 404
+		if !strings.HasPrefix(path, "/api") && 
+		   !strings.HasPrefix(path, "/static") && 
+		   !strings.HasPrefix(path, "/lab1") &&
+		   path != "/" && 
+		   path != "/service" && 
+		   path != "/order" && 
+		   path != "/calculator" {
+			c.JSON(http.StatusNotFound, gin.H{
+				"error": "Route not found",
+				"message": "This route should be handled by the frontend SPA",
+			})
+			return
+		}
+		c.JSON(http.StatusNotFound, gin.H{"error": "Not found"})
+	})
 
 	// Запускаем сервер
 	serverAddress := fmt.Sprintf("%s:%d", conf.ServiceHost, conf.ServicePort)
