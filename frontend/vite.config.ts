@@ -6,7 +6,7 @@ import path from 'path'
 // https://vitejs.dev/config/
 export default defineConfig({
   // Для GitHub Pages используем VITE_BASE_URL или имя репозитория
-  base: process.env.VITE_BASE_URL || (process.env.NODE_ENV === 'production' ? '/RIP/' : '/'),
+  base: process.env.VITE_BASE_URL || (process.env.NODE_ENV === 'production' ? '/RIP-2-mod-/' : '/'),
   plugins: [
     react(),
     VitePWA({
