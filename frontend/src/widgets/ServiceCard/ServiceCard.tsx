@@ -17,8 +17,11 @@ interface ServiceCardProps {
  * @param props - содержит объект service с данными услуги
  */
 export function ServiceCard({ service }: ServiceCardProps) {
+  // Получаем base URL из Vite (для GitHub Pages это /RIP-2-mod-/)
+  const baseUrl = import.meta.env.BASE_URL || '/';
   // URL изображения по умолчанию если поле пустое
-  const imageUrl = service.imageUrl || '/assets/default.svg';
+  const defaultImageUrl = `${baseUrl}assets/default.svg`;
+  const imageUrl = service.imageUrl || defaultImageUrl;
   
   return (
     <div className="service-card">
@@ -28,7 +31,7 @@ export function ServiceCard({ service }: ServiceCardProps) {
         className="service-image"
         onError={(e) => {
           // Fallback если изображение не загрузилось
-          (e.target as HTMLImageElement).src = '/assets/default.svg';
+          (e.target as HTMLImageElement).src = defaultImageUrl;
         }}
       />
       <div className="service-content">

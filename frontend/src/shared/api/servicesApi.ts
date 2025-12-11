@@ -30,7 +30,9 @@ function convertService(raw: TransportServiceRaw): TransportService {
       } else {
         // Для веб-версии используем относительный путь через прокси бэкенда
         // Бэкенд проксирует /lab1/* к MinIO
-        imageUrl = imagePath;
+        // Учитываем base path для GitHub Pages
+        const baseUrl = import.meta.env.BASE_URL || '/';
+        imageUrl = `${baseUrl}${imagePath.replace(/^\//, '')}`;
         console.log(`[Web] Converted image URL: ${raw.image_url} -> ${imageUrl}`);
       }
     }
