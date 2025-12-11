@@ -20,8 +20,8 @@ export default defineConfig({
         background_color: '#f8f9fa',
         display: 'standalone',
         orientation: 'portrait',
-        scope: process.env.VITE_BASE_URL || (process.env.NODE_ENV === 'production' ? '/RIP/' : '/'),
-        start_url: process.env.VITE_BASE_URL || (process.env.NODE_ENV === 'production' ? '/RIP/' : '/'),
+        scope: process.env.VITE_BASE_URL || (process.env.NODE_ENV === 'production' ? '/RIP-2-mod-/' : '/'),
+        start_url: process.env.VITE_BASE_URL || (process.env.NODE_ENV === 'production' ? '/RIP-2-mod-/' : '/'),
         icons: [
           {
             src: 'pwa-192x192.png',
