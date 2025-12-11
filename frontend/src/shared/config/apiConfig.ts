@@ -32,9 +32,12 @@ const getServerIP = (): string => {
       }
       return savedIP;
     }
-    // По умолчанию для Tauri используем localhost (пользователь должен настроить)
-    // Временно используем HTTP для разработки (HTTPS требует доверенный сертификат)
-    return 'http://localhost:8083';
+    // Автоматически устанавливаем IP по умолчанию при первом запуске
+    // Используем IP локальной сети (192.168.1.64) для доступа к бэкенду
+    const defaultIP = 'http://192.168.1.64:8083';
+    localStorage.setItem('api_server_ip', defaultIP);
+    console.log(`[Config] Auto-set default IP: ${defaultIP}`);
+    return defaultIP;
   }
   // Для веб-версии используем относительные пути
   return '';
