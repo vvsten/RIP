@@ -151,33 +151,24 @@ func main() {
 	if conf.EnableHTTPS {
 		logrus.Infof("Starting HTTPS server on %s", serverAddress)
 		
-		// Создаем HTTP сервер с TLS конфигурацией
-		// Настраиваем для работы с самоподписанными сертификатами
+		// Загружаем сертификат для проверки
+		cert, err := tls.LoadX509KeyPair(conf.CertFile, conf.KeyFile)
+		if err != nil {
+			logrus.Fatalf("Failed to load certificate: %v", err)
+		}
+		logrus.Infof("Certificate loaded successfully from %s", conf.CertFile)
+		
+		// Создаем HTTP сервер с упрощенной TLS конфигурацией
+		// Используем минимальную конфигурацию для максимальной совместимости
 		srv := &http.Server{
 			Addr:    serverAddress,
 			Handler: r,
 			TLSConfig: &tls.Config{
-				MinVersion: tls.VersionTLS12,
-				// Разрешаем все cipher suites для совместимости с разными клиентами
-				CipherSuites: []uint16{
-					tls.TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256,
-					tls.TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384,
-					tls.TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256,
-					tls.TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384,
-					tls.TLS_ECDHE_RSA_WITH_CHACHA20_POLY1305,
-					tls.TLS_ECDHE_ECDSA_WITH_CHACHA20_POLY1305,
-					tls.TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA,
-					tls.TLS_ECDHE_RSA_WITH_AES_256_CBC_SHA,
-					tls.TLS_ECDHE_ECDSA_WITH_AES_128_CBC_SHA,
-					tls.TLS_ECDHE_ECDSA_WITH_AES_256_CBC_SHA,
-					tls.TLS_RSA_WITH_AES_128_GCM_SHA256,
-					tls.TLS_RSA_WITH_AES_256_GCM_SHA384,
-					tls.TLS_RSA_WITH_AES_128_CBC_SHA,
-					tls.TLS_RSA_WITH_AES_256_CBC_SHA,
-				},
-				PreferServerCipherSuites: true,
-				// Включаем поддержку всех версий TLS для совместимости
-				MaxVersion: tls.VersionTLS13,
+				Certificates: []tls.Certificate{cert},
+				MinVersion:    tls.VersionTLS12,
+				MaxVersion:   tls.VersionTLS13,
+				// Не ограничиваем cipher suites - пусть Go выберет автоматически
+				// Это обеспечит лучшую совместимость с разными клиентами
 			},
 			// Увеличиваем таймауты для TLS handshake
 			ReadTimeout:  30 * time.Second,
@@ -186,7 +177,8 @@ func main() {
 		}
 		
 		// Запускаем HTTPS сервер
-		if err := srv.ListenAndServeTLS(conf.CertFile, conf.KeyFile); err != nil && err != http.ErrServerClosed {
+		logrus.Info("HTTPS server is ready to accept connections")
+		if err := srv.ListenAndServeTLS("", ""); err != nil && err != http.ErrServerClosed {
 			logrus.Fatalf("Failed to start HTTPS server: %v", err)
 		}
 	} else {
