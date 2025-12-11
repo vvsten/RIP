@@ -5,9 +5,9 @@
   "build": {
     "beforeDevCommand": "cd frontend && npm run dev",
     "beforeBuildCommand": "cd frontend && npm run build",
-    "devUrl": "http://localhost:3001",
+    "devUrl": "http://localhost:3000",
     "frontendDist": "frontend/dist"
-    },
+  },
   "app": {
     "windows": [
       {
@@ -21,7 +21,8 @@
       }
     ],
     "security": {
-      "csp": "default-src 'self' http://*:* https://*:* data: blob: 'unsafe-inline' 'unsafe-eval'; img-src 'self' http://*:* https://*:* data: blob:;"
+      "dangerousDisableAssetCspModification": true,
+      "csp": "default-src 'self' http://*:* https://*:* data: blob: 'unsafe-inline' 'unsafe-eval'; img-src 'self' http://*:* https://*:* data: blob:; connect-src 'self' http://*:* https://*:* ws://*:* wss://*:*;"
     }
   },
   "bundle": {
