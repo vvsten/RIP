@@ -13,14 +13,9 @@ function convertService(raw: TransportServiceRaw): TransportService {
       // Для Tauri заменяем localhost на IP сервера
       const serverIP = getServerIPAddress();
       if (serverIP) {
-        // Извлекаем IP из URL (убираем https:// и порт)
-        const ipMatch = serverIP.match(/https?:\/\/([^:]+)/);
-        if (ipMatch) {
-          const ip = ipMatch[1];
-          // Для Tauri используем прокси через бэкенд
-          imageUrl = imageUrl.replace('http://localhost:9003', `${serverIP}`);
-          console.log(`[Tauri] Converted image URL: ${raw.image_url} -> ${imageUrl}`);
-        }
+        // Для Tauri используем прокси через бэкенд
+        imageUrl = imageUrl.replace('http://localhost:9003', `${serverIP}`);
+        console.log(`[Tauri] Converted image URL: ${raw.image_url} -> ${imageUrl}`);
       } else {
         console.warn('[Tauri] Server IP not configured, using original image URL');
       }
