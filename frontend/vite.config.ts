@@ -97,7 +97,7 @@ export default defineConfig({
       },
       // Прокси для статических файлов бэкенда (CSS, JS, изображения)
       '/static': {
-        target: 'https://localhost:8083',
+        target: 'http://localhost:8083',
         changeOrigin: true,
         secure: false,
       }
