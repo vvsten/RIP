@@ -152,12 +152,37 @@ func main() {
 		logrus.Infof("Starting HTTPS server on %s", serverAddress)
 		
 		// Создаем HTTP сервер с TLS конфигурацией
+		// Настраиваем для работы с самоподписанными сертификатами
 		srv := &http.Server{
 			Addr:    serverAddress,
 			Handler: r,
 			TLSConfig: &tls.Config{
 				MinVersion: tls.VersionTLS12,
+				// Разрешаем все cipher suites для совместимости с разными клиентами
+				CipherSuites: []uint16{
+					tls.TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256,
+					tls.TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384,
+					tls.TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256,
+					tls.TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384,
+					tls.TLS_ECDHE_RSA_WITH_CHACHA20_POLY1305,
+					tls.TLS_ECDHE_ECDSA_WITH_CHACHA20_POLY1305,
+					tls.TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA,
+					tls.TLS_ECDHE_RSA_WITH_AES_256_CBC_SHA,
+					tls.TLS_ECDHE_ECDSA_WITH_AES_128_CBC_SHA,
+					tls.TLS_ECDHE_ECDSA_WITH_AES_256_CBC_SHA,
+					tls.TLS_RSA_WITH_AES_128_GCM_SHA256,
+					tls.TLS_RSA_WITH_AES_256_GCM_SHA384,
+					tls.TLS_RSA_WITH_AES_128_CBC_SHA,
+					tls.TLS_RSA_WITH_AES_256_CBC_SHA,
+				},
+				PreferServerCipherSuites: true,
+				// Включаем поддержку всех версий TLS для совместимости
+				MaxVersion: tls.VersionTLS13,
 			},
+			// Увеличиваем таймауты для TLS handshake
+			ReadTimeout:  30 * time.Second,
+			WriteTimeout: 30 * time.Second,
+			IdleTimeout:  120 * time.Second,
 		}
 		
 		// Запускаем HTTPS сервер
