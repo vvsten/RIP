@@ -9,21 +9,30 @@ function convertService(raw: TransportServiceRaw): TransportService {
   // Преобразуем полный URL в относительный путь для прокси или IP для Tauri
   let imageUrl = raw.image_url;
   if (imageUrl) {
-    if (isTauriApp()) {
-      // Для Tauri заменяем localhost на IP сервера
-      const serverIP = getServerIPAddress();
-      if (serverIP) {
-        // Для Tauri используем прокси через бэкенд
-        imageUrl = imageUrl.replace('http://localhost:9003', `${serverIP}`);
-        console.log(`[Tauri] Converted image URL: ${raw.image_url} -> ${imageUrl}`);
+    if (imageUrl.startsWith('http://localhost:9003/')) {
+      // Извлекаем путь из URL (например, /lab1/fura.jpg)
+      const urlObj = new URL(imageUrl);
+      const imagePath = urlObj.pathname; // /lab1/fura.jpg
+      
+      if (isTauriApp()) {
+        // Для Tauri используем полный URL с IP сервера и путем /lab1/...
+        const serverIP = getServerIPAddress();
+        if (serverIP) {
+          // Убираем trailing slash если есть
+          const baseUrl = serverIP.replace(/\/$/, '');
+          imageUrl = `${baseUrl}${imagePath}`;
+          console.log(`[Tauri] Converted image URL: ${raw.image_url} -> ${imageUrl}`);
+        } else {
+          // Fallback: используем относительный путь
+          imageUrl = imagePath;
+          console.warn('[Tauri] Server IP not configured, using relative path');
+        }
       } else {
-        console.warn('[Tauri] Server IP not configured, using original image URL');
+        // Для веб-версии используем относительный путь через прокси бэкенда
+        // Бэкенд проксирует /lab1/* к MinIO
+        imageUrl = imagePath;
+        console.log(`[Web] Converted image URL: ${raw.image_url} -> ${imageUrl}`);
       }
-    } else if (imageUrl.startsWith('http://localhost:9003/')) {
-      // Для веб-версии используем относительный путь через прокси бэкенда
-      // Бэкенд проксирует /lab1/* к MinIO
-      imageUrl = imageUrl.replace('http://localhost:9003', '');
-      console.log(`[Web] Converted image URL: ${raw.image_url} -> ${imageUrl}`);
     }
   }
   
