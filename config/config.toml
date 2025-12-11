@@ -2,7 +2,8 @@ ServiceHost = "0.0.0.0"
 ServicePort = 8083
 
 # HTTPS Configuration
-EnableHTTPS = true
+# Временно отключено для разработки (Tauri не может работать с самоподписанными сертификатами)
+EnableHTTPS = false
 CertFile = "certs/server.crt"
 KeyFile = "certs/server.key"
 

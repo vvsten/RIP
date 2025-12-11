@@ -69,8 +69,8 @@ export function ServerConfig() {
   
   const handleSave = () => {
     const port = '8083';
-    // Используем HTTPS для подключения
-    const fullUrl = `https://${ip}:${port}`;
+    // Временно используем HTTP для разработки (HTTPS требует доверенный сертификат)
+    const fullUrl = `http://${ip}:${port}`;
     setServerIP(fullUrl);
   };
   

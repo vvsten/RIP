@@ -69,20 +69,18 @@ export default defineConfig({
     // Прокси для обхода CORS - перенаправляем /api на бэкенд
     proxy: {
       '/api': {
-        target: 'https://localhost:8083',
+        target: 'http://localhost:8083',
         changeOrigin: true,
-        secure: false, // Игнорируем ошибки сертификата для localhost
         ws: true,
       },
       // Прокси для MinIO изображений через бэкенд
       '/lab1': {
-        target: 'https://localhost:8083',
+        target: 'http://localhost:8083',
         changeOrigin: true,
-        secure: false, // Игнорируем ошибки сертификата для localhost
       },
       // Прокси для калькулятора - отдаем бэкенду
       '/calculator': {
-        target: 'https://localhost:8083',
+        target: 'http://localhost:8083',
         changeOrigin: true,
         secure: false,
       },
