@@ -63,6 +63,6 @@ jobs:
           publish_dir: ./frontend/dist
           cname: false
           remove_old_files: true
-          # Принудительно удаляем CNAME из gh-pages
-          force_orphan: false
+          # Убеждаемся, что CNAME не создается
+          keep_files: false
 
