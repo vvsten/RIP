@@ -1,0 +1,1 @@
+if('serviceWorker' in navigator) {window.addEventListener('load', () => {navigator.serviceWorker.register('/RIP-2-mod-/sw.js', { scope: '/RIP-2-mod-/' })})}
