@@ -56,6 +56,21 @@ jobs:
           echo "✓ CNAME removed (if existed)"
           echo "✓ index.html found"
       
+      - name: Remove CNAME from gh-pages branch
+        run: |
+          # Клонируем репозиторий и удаляем CNAME из gh-pages
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+          git clone --branch gh-pages --single-branch https://github.com/${{ github.repository }}.git gh-pages-temp || true
+          cd gh-pages-temp
+          if [ -f CNAME ]; then
+            git rm CNAME
+            git commit -m "Remove CNAME file" || true
+            git push https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git gh-pages || true
+          fi
+          cd ..
+          rm -rf gh-pages-temp
+      
       - name: Deploy to GitHub Pages
         uses: peaceiris/actions-gh-pages@v3
         with:
@@ -63,6 +78,4 @@ jobs:
           publish_dir: ./frontend/dist
           cname: false
           remove_old_files: true
-          # Убеждаемся, что CNAME не создается
-          keep_files: false
 
