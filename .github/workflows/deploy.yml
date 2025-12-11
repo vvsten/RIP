@@ -38,15 +38,20 @@ jobs:
           NODE_ENV: production
           VITE_BASE_URL: /RIP-2-mod-/
       
-      - name: Copy .nojekyll to dist
+      - name: Prepare dist for GitHub Pages
         run: |
-          if [ -f frontend/.nojekyll ]; then
-            cp frontend/.nojekyll frontend/dist/.nojekyll
-          else
-            touch frontend/dist/.nojekyll
-          fi
+          # Создаем .nojekyll файл (обязательно для SPA на GitHub Pages)
+          touch frontend/dist/.nojekyll
           # Удаляем CNAME если он есть (может мешать GitHub Pages)
           rm -f frontend/dist/CNAME
+          # Проверяем, что index.html существует
+          if [ ! -f frontend/dist/index.html ]; then
+            echo "ERROR: index.html not found in dist!"
+            exit 1
+          fi
+          echo "✓ .nojekyll created"
+          echo "✓ CNAME removed (if existed)"
+          echo "✓ index.html found"
       
       - name: Deploy to GitHub Pages
         uses: peaceiris/actions-gh-pages@v3
