@@ -36,7 +36,7 @@ jobs:
         run: npm run build
         env:
           NODE_ENV: production
-          VITE_BASE_URL: /RIP-2-mod-/
+          VITE_BASE_URL: /RIP-2-mod-transport_logistic/
       
       - name: Prepare dist for GitHub Pages
         run: |

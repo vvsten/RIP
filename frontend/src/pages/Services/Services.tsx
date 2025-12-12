@@ -3,6 +3,7 @@ import { useAppSelector, useAppDispatch } from '../../shared/store/hooks';
 import { setFilters } from '../../shared/store/slices/filtersSlice';
 import { Filters } from '../../widgets/Filters/Filters';
 import { ServiceCard } from '../../widgets/ServiceCard/ServiceCard';
+import { CartIcon } from '../../widgets/Cart/CartIcon';
 import { fetchTransportServices } from '../../shared/api/servicesApi';
 import type { TransportService, TransportServiceFilters } from '../../shared/types/TransportService';
 
@@ -73,6 +74,9 @@ export function Services() {
   
   return (
     <div className="container">
+      {/* Иконка корзины в правом верхнем углу под хедером */}
+      <CartIcon />
+      
       <h2 style={{ marginBottom: '2rem', fontSize: '2rem', fontWeight: 'bold' }}>
         Наши услуги
       </h2>

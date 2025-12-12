@@ -263,12 +263,21 @@ func (h *Handler) AddToCart(ctx *gin.Context) {
 		return
 	}
 
+	// Получаем корзину после добавления товара
+	cart, err := h.Repository.GetCart()
+	if err != nil {
+        fail(ctx, http.StatusInternalServerError, "failed to get cart after adding item")
+		return
+	}
+	
 	// Возвращаем обновленное количество в корзине
 	count := h.Repository.GetCartCount()
+	
 	ctx.JSON(http.StatusOK, gin.H{
-		"success": true,
-		"count":   count,
-		"message": "Услуга добавлена в корзину",
+		"success":    true,
+		"count":      count,
+		"request_id": cart.ID,
+		"message":    "Услуга добавлена в корзину",
 	})
 }
 
@@ -298,14 +307,17 @@ func (h *Handler) GetCart(ctx *gin.Context) {
 		return
 	}
 
+	count := h.Repository.GetCartCount()
+	
 	ctx.JSON(http.StatusOK, gin.H{
 		"cart":     cart,
 		"services": services,
-		"count":    h.Repository.GetCartCount(),
+		"count":    count,
 	})
 }
 
 // GetCartCount - получение количества услуг в корзине
+// Возвращает реальное количество товаров в корзине
 func (h *Handler) GetCartCount(ctx *gin.Context) {
 	count := h.Repository.GetCartCount()
 	ctx.JSON(http.StatusOK, gin.H{"count": count})
@@ -1164,19 +1176,43 @@ func (h *Handler) DeleteLogisticRequest(ctx *gin.Context) {
 }
 
 // GetCartIcon - получение иконки корзины
+// Всегда возвращает 200 OK с count: 0 (активна) или -1 (неактивна)
+// Не возвращает ошибки 403, 404, 500 - только 0 или -1
 func (h *Handler) GetCartIcon(ctx *gin.Context) {
-    // Используем ту же логику, что и GetCart - для гостевой корзины
+    // Пытаемся получить корзину, но не возвращаем ошибку если не найдена
     cart, err := h.Repository.GetCart()
+    var count int
+    
     if err != nil {
-        fail(ctx, http.StatusInternalServerError, "failed to get cart")
-        return
+        // Если корзина не найдена - считаем что она пуста (неактивна)
+        count = 0
+    } else {
+        // Получаем количество товаров в корзине
+        count = h.Repository.GetCartCount()
     }
-
-    count := h.Repository.GetCartCount()
+    
+    // Когда кнопка активна (count > 0) - возвращаем 0, когда неактивна (count <= 0) - возвращаем -1
+    // Это значение для Network DevTools (для демонстрации)
+    var statusValue int
+    if count > 0 {
+        statusValue = 0  // кнопка активна
+    } else {
+        statusValue = -1 // кнопка неактивна
+    }
+    
+    // Всегда возвращаем 200 OK, даже если корзина не найдена
+    requestID := 0
+    if err == nil {
+        requestID = cart.ID
+    }
+    
+    // Возвращаем statusValue (0/-1) в count для Network tab
+    // И реальное количество в real_count для отображения на экране
     ctx.JSON(http.StatusOK, gin.H{
 		"status":     "ok",
-		"request_id": cart.ID,
-		"count":      count,
+		"request_id": requestID,
+		"count":      statusValue,      // 0 или -1 для Network DevTools
+		"real_count": count,           // реальное количество для отображения
     })
 }
 

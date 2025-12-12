@@ -38,20 +38,21 @@ export function ServerConfig() {
     
     if (isTauri) {
       const currentIP = getServerIPAddress();
-      // Извлекаем IP из URL (убираем http:// и порт)
+      // Извлекаем IP из URL (убираем http://, https:// и порт)
       if (currentIP) {
         // Поддерживаем и http:// и https://
-        const ipMatch = currentIP.match(/https?:\/\/([^:]+)/);
+        // Извлекаем только IP адрес без порта
+        const ipMatch = currentIP.match(/https?:\/\/([^:/]+)/);
         if (ipMatch) {
           setIp(ipMatch[1]);
         } else {
           // Если IP не настроен, пытаемся определить автоматически
-          // Для локальной сети используем 192.168.1.64 (из скриншота видно)
-          setIp('192.168.1.64');
+          // Для локальной сети используем текущий IP
+          setIp('172.20.10.2');
         }
       } else {
         // По умолчанию используем IP из локальной сети
-        setIp('192.168.1.64');
+        setIp('172.20.10.2');
       }
     }
   }, []);
@@ -72,8 +73,14 @@ export function ServerConfig() {
   
   const handleSave = () => {
     const port = '8083';
+    // Очищаем IP от возможных протоколов и портов
+    let cleanIP = ip.trim();
+    // Убираем http:// или https:// если есть
+    cleanIP = cleanIP.replace(/^https?:\/\//, '');
+    // Убираем порт если есть (формат IP:PORT)
+    cleanIP = cleanIP.split(':')[0];
     // Временно используем HTTP для разработки (HTTPS требует доверенный сертификат)
-    const fullUrl = `http://${ip}:${port}`;
+    const fullUrl = `http://${cleanIP}:${port}`;
     setServerIP(fullUrl);
   };
   

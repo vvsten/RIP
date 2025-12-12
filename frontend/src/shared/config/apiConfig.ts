@@ -33,8 +33,9 @@ const getServerIP = (): string => {
       return savedIP;
     }
     // Автоматически устанавливаем IP по умолчанию при первом запуске
-    // Используем IP локальной сети (192.168.1.64) для доступа к бэкенду
-    const defaultIP = 'http://192.168.1.64:8083';
+    // Используем IP локальной сети для доступа к бэкенду
+    // Если IP изменился, обновите его в настройках Tauri
+    const defaultIP = 'http://172.20.10.2:8083';
     localStorage.setItem('api_server_ip', defaultIP);
     console.log(`[Config] Auto-set default IP: ${defaultIP}`);
     return defaultIP;
