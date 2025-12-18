@@ -1,4 +1,7 @@
-import { getApiUrl } from '../../shared/config/apiConfig';
+import { useState } from 'react';
+import { useAppDispatch, useAppSelector } from '../../shared/store/hooks';
+import { addToCart } from '../../shared/store/slices/cartSlice';
+import { useNavigate } from 'react-router-dom';
 import type { TransportService } from '../../shared/types/TransportService';
 
 /**
@@ -14,57 +17,48 @@ interface ServiceCardProps {
  * 
  * Отображает информацию об услуге в виде карточки с существующими стилями
  * Если изображения нет, подставляет изображение по-умолчанию
+ * Использует Redux для добавления услуги в корзину (заявку)
  * 
  * @param props - содержит объект service с данными услуги
  */
 export function ServiceCard({ service }: ServiceCardProps) {
+  const dispatch = useAppDispatch();
+  const navigate = useNavigate();
+  const { isAuthenticated } = useAppSelector((state) => state.auth);
+  const { isLoading } = useAppSelector((state) => state.cart);
+  const [adding, setAdding] = useState(false);
+
   // Получаем base URL из Vite (для GitHub Pages это /RIP-2-mod-/)
   const baseUrl = import.meta.env.BASE_URL || '/';
   // URL изображения по умолчанию если поле пустое
   const defaultImageUrl = `${baseUrl}assets/default.svg`;
   const imageUrl = service.imageUrl || defaultImageUrl;
   
-  // Обработчик добавления в корзину
+  // Обработчик добавления в корзину (заявку)
   const handleAddToCart = async (e: React.MouseEvent<HTMLButtonElement>) => {
     e.preventDefault();
     e.stopPropagation();
     
+    // Если пользователь не авторизован, перенаправляем на страницу входа
+    if (!isAuthenticated) {
+      navigate('/login');
+      return;
+    }
+    
+    setAdding(true);
     try {
-      const response = await fetch(getApiUrl(`/api/cart/add/${service.id}`), {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        }
-      });
-      
-      if (!response.ok) {
-        const errorData = await response.json().catch(() => ({}));
-        throw new Error(errorData.error || `HTTP error! status: ${response.status}`);
-      }
-      
-      const data = await response.json();
-      
-      if (data.success) {
-        console.log('ServiceCard: товар добавлен, count:', data.count, 'request_id:', data.request_id);
-        
-        // Обновляем счетчик корзины через событие
-        const event = new CustomEvent('cartUpdated', { 
-          detail: { 
-            count: data.count,
-            request_id: data.request_id 
-          } 
-        });
-        console.log('ServiceCard: отправляю событие cartUpdated', event.detail);
-        window.dispatchEvent(event);
-        
+      const result = await dispatch(addToCart(service.id));
+      if (addToCart.fulfilled.match(result)) {
         // Показываем уведомление об успехе
-        alert(data.message || 'Услуга добавлена в корзину');
+        alert('Услуга добавлена в заявку');
       } else {
-        alert('Ошибка: ' + (data.error || 'Не удалось добавить в корзину'));
+        alert('Ошибка: ' + (result.payload as string || 'Не удалось добавить в заявку'));
       }
     } catch (error) {
       console.error('Ошибка при добавлении в корзину:', error);
-      alert('Произошла ошибка при добавлении в корзину: ' + (error instanceof Error ? error.message : 'Неизвестная ошибка'));
+      alert('Произошла ошибка при добавлении в заявку');
+    } finally {
+      setAdding(false);
     }
   };
   
@@ -88,8 +82,13 @@ export function ServiceCard({ service }: ServiceCardProps) {
             type="button"
             className="consult-btn" 
             onClick={handleAddToCart}
+            disabled={adding || isLoading}
+            style={{
+              opacity: (adding || isLoading) ? 0.6 : 1,
+              cursor: (adding || isLoading) ? 'not-allowed' : 'pointer',
+            }}
           >
-            Получить консультацию
+            {adding || isLoading ? 'Добавление...' : 'Добавить'}
           </button>
         </div>
       </div>
